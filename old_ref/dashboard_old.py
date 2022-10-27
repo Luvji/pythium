@@ -4,7 +4,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 from login import signin_with_cpr
 
-
+#click on pay wallet - old
 def p2p_click(self):
     try:
         test_name = "p2p_click"
@@ -132,14 +132,16 @@ def p2p_click(self):
         testcasereport(test_name,status,message)
         return tr
 
+# click on add money
 def add_money_click(self):
     test_name = "add_money_click"
     tr = False    #test result variable to return value
     d = self.driver
     driver = d
     curractivity = d.current_activity   
-    once = 0 # special variable for click functions to stop recursive hell
+    # once = 0 # special variable for click functions to stop recursive hell
     #implement better logic if you got one.
+    txtwelcome_id = "com.bfccirrus.bfcpayments.mobile:id/txtWelcome"
     print("proceeding to click and navigate to entity :"+test_name)
     wait_until_activity(d,"com.bfc.bfcpayments.modules.home.view.DashboardActivity","visible",7)
     if(curractivity == "com.bfc.bfcpayments.modules.home.view.DashboardActivity"): # or curractivity == "com.bfc.bfcpayments.modules.wallet.view.AddMoneyWalletActivity"):
@@ -205,12 +207,7 @@ def add_money_click(self):
         testcasereport(test_name,status,message)
         return tr
           
-            
-            
-
-# def show_dashboard(d):
-#     print("showing the dashboard")
-
+# click tabib
 def tabib_click(self):
     test_name = "tabib_click"
     tr = False    #test result variable to return value
@@ -310,33 +307,7 @@ def tabib_click(self):
         testcasereport(test_name,status,message)
         return tr  
     
-    
-    
-    ### this function moved to util in new v2
-# def go_and_check_dashboardbalance(d):
-#     '''
-#     redirects to dashboard and find the wallet balance in them.
-#     '''
-#     try:
-#     #id com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal
-#         print("fetching dashboard amt")
-#         if d.current_activity != dashboardactivity:
-#             back_to_dashboard(d)
-#             wait_until_activity(d,dashboardactivity,"visible")
-#         else:
-#             print("dashboard is already in view , may need a scroll up to on top")
-#             #ensuring top of dashboard
-#             # d.swipe(34, 406, 40, 700, duration=600)
-#         welcomeinhometxtid = "com.bfccirrus.bfcpayments.mobile:id/txtWelcome"
-#         wait_until(d,welcomeinhometxtid,"visible")
-#         walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
-#         print("current balance is :",walletbal)
-#         return float(walletbal)
-#     except Exception as e:
-#         print(e)# e
-        
-        
-        
+# click pay wallet    
 def p2p_click2(self,minimal =False):
     test_name = "p2p_click"
     status = "incomplete"
@@ -638,10 +609,8 @@ def p2p_click2(self,minimal =False):
         print("Test result = "+str(tr) +"\033[m\033[0m")
         testcasereport(test_name,status,message)
         return tr
-    
-    
-    
-    
+
+#click pay bills from dashboard
 def click_paybills(self,minimal =False):
     test_name = "paybills_click"
     status = "incomplete"

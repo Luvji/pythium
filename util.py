@@ -35,12 +35,26 @@ assert_count = { "PASS":0,"FAIL":0 }
 middlespace = " "*int(os.get_terminal_size().columns/3)
 # these are utility functions defined for test pages. write utility or recursive function in this  
 
-
+def centerofcmd(text="",pos=True):
+    '''
+    pos = TRue returns position only with spaces 
+        false prints it with text 
+    
+    '''    
+    if os.get_terminal_size().columns > len(text)+6:
+            center = " "*int( (os.get_terminal_size().columns - len(text)/2)/2)
+    else:
+            center = "   "
+    if pos:
+            return center
+    else:
+            print(center+text)
+    
+    
 def get_linenumber():
     cf = currentframe()
     print(cf.f_back.f_lineno)
     return cf.f_back.f_lineno
-
 
 def color(txt = '', bg = '' ,style =''):
     '''
@@ -76,7 +90,6 @@ def color(txt = '', bg = '' ,style =''):
     print(code)
     return code
 
-    
 def xpath(d,xpath):
     try:
         return d.find_element_by_xpath('//android.widget.TextView[@text = "'+xpath+'"]')
@@ -84,7 +97,6 @@ def xpath(d,xpath):
         print(e)
         # return False
         
-
 def p(*args, **kwargs):
     print(*args, **kwargs)
     with open( sessionlogfile ,'a+',encoding="utf-8") as file:
@@ -102,7 +114,6 @@ def check_and_hide_keyboard(d):
     except Exception as e:
         print (e)
         pass
-        
         
 def save_screenshot(d, test_name):
     now = datetime.now()
@@ -124,7 +135,6 @@ def save_screenshot(d, test_name):
     # screenshotBase64.save(r"C:\Users\Administrator\Desktop\python class\Output\2022-08-04\screenshots\testfunction222.png")
     p("second screen shot")
 
-
 def testcasereport(testname,status,msg = "No message provided"):
     msg = "Message : "+str(msg)
     if status in ['fail','Fail','FAIL','failed','Failed','FAILED',False]:
@@ -145,7 +155,7 @@ def testcasereport(testname,status,msg = "No message provided"):
         p("="*os.get_terminal_size().columns)
 
 def printred(msg):
-    p("\n \033[;33m ")
+    p(" \033[;33m ")
     p(msg)
     p(" \033[0m ")
 
@@ -153,7 +163,6 @@ def printblue(msg):
     p("\033[0;34m")
     p(msg+"\033[0m")
     
-
 def reportcard(check):
     now = datetime.now()
     current_time = str(now.strftime("%H-%M-%S"))
@@ -211,12 +220,13 @@ def reportcard(check):
     totassert = assert_count["PASS"]+assert_count["FAIL"]
     
     p("Total Asserts == ",totassert)
+    print(CRESET)
+    # centerofcmd(PURPLE+str(assert_count["FAIL"])+" /"+str(totassert)+" ASSERT(s) FAILED",False)
+    # centerofcmd(CYAN+str(assert_count["PASS"])+" /"+str(totassert)+" ASSERT(s) PASSED"+CRESET,False)
     print(middlespace+PURPLE+str(assert_count["FAIL"])+" /"+str(totassert)+" ASSERT(s) FAILED")
     print(middlespace+CYAN+str(assert_count["PASS"])+" /"+str(totassert)+" ASSERT(s) PASSED"+CRESET)
     p("\033[0m")
 
-
-    
 def setup_output_folder_structure():
     # below changed to config
     # pathoutput = "Output" 
@@ -279,8 +289,7 @@ def setup_output_folder_structure():
     finally:
         # if(error is None):
         pass
-
-    
+ 
 def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
     '''
     returns boolean
@@ -293,7 +302,7 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
     iterate = frequency
     '''
     curractivity = d.current_activity
-    p("current ACTIVITY when wait_until-activity called",curractivity)
+    p("current ACTIVITY when wait_until-activity called ",curractivity)
     counter = 0
     if (condition == "visible" and activityname != ""):
         while (curractivity != activityname and counter<sec ):
@@ -306,7 +315,7 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
                 p("activity: "+activityname+" found waited for :"+str(counter)+" seconds")
                 return True
             else:
-                p(YELLOW+"activity: "+activityname+" not found waited for :"+str(counter)+" seconds. curractivity is"+RED+curractivity+CRESET)
+                p(YELLOW+"activity: "+activityname+" not found waited for :"+str(counter)+" seconds. curractivity is "+RED+curractivity+CRESET)
                 return False
     elif (condition == "notvisible" and activityname != ""):
         while (curractivity == activityname and counter<sec ):
@@ -320,146 +329,179 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
                 return True
             else:
                 p(activityname+"still visible.that means"+curractivity+" is current activity.took"+str(counter)+" seconds")
-                return False
-                
-                
+                return False                         
 # end wait_until_activity    
     
 def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .5,minimal = False):
     '''
     only returns bool if condition is not string check .
     used to check and wait for if a text value of a id/xpath has changed.
+    
+    
     d = self.driver , string = id/xpath locator ,checker = strng to compare.
+    
     condition -> == waits until the value becomes equal.
-                 != waits until the value becomes different. 
-                            visible waits until it is visible.
-                 ~  <default> waits until text contains checker string.  
-    sec = maximum wait time , iterate = frequency.
+                != waits until the value becomes different. 
+                visible waits until it is visible.
+                not visible waits until it is not visible
+                ~  <default> waits until text contains checker string.  
+                sec = maximum wait time , iterate = frequency.
     '''
-    if minimal:
-        counter = 0
-        if (condition == "==" and checker != ""):
-            p("checking if the text contains text :"+checker)
-            if(locatorstring.startswith("//")):
-                txtxapth = d.find_element_by_xpath(locatorstring)
-                p("xpaths = "+str(txtxapth))
-                txt = d.find_element_by_xpath(locatorstring).text
-            else:            
-                txt = d.find_element_by_id(locatorstring).text
-            while (txt != checker and counter<sec ):
-                counter = counter + iterate
-                sleep(iterate)
-                txt = d.find_element_by_id(locatorstring).text
-            else:
-                if txt == checker and counter<=sec  :
-                    p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
-                    return True
+    try:
+        d.implicitly_wait(3)
+        if minimal:
+            counter = 0
+            if (condition == "==" and checker != ""):
+                p("checking if the text contains text :"+checker)
+                if(locatorstring.startswith("//")):
+                    txtxapth = d.find_element_by_xpath(locatorstring)
+                    p("xpaths = "+str(txtxapth))
+                    txt = d.find_element_by_xpath(locatorstring).text
+                else:            
+                    txt = d.find_element_by_id(locatorstring).text
+                while (txt != checker and counter<sec ):
+                    counter = counter + iterate
+                    sleep(iterate)
+                    txt = d.find_element_by_id(locatorstring).text
                 else:
-                    p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
-                    return False
-                    
-        elif(condition == "visible" and locatorstring.startswith("//")):
-            # p("checking for element visibility")
-            while (len(d.find_elements_by_xpath(locatorstring)) == 0 and counter<sec):
-                counter = counter + iterate
-                sleep(iterate)
-            else:
-                if counter>=sec :
-                    p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
-                    return False
+                    if txt == checker and counter<=sec  :
+                        p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
+                        return True
+                    else:
+                        p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
+                        return False
+                        
+            elif(condition == "visible" and locatorstring.startswith("//")):
+                # p("checking for element visibility")
+                while (len(d.find_elements_by_xpath(locatorstring)) == 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
                 else:
-                    p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
-                    return True
-        
-        elif(condition == "visible"):
-            # p("checking for element visibility by id")
-            while (len(d.find_elements_by_id(locatorstring)) == 0 and counter<sec):
-                counter = counter + iterate
-                sleep(iterate)
-            else:
-                if counter>=sec :
-                    p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
-                    return False
-                else:
-                    p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
-                    return True
-                
-            # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
-            # p("if you are a developer please create one now")
-        else:
-            if (condition == "==" and checker == ""):
-                p("checker string missing, sleeping 3 for the sake of test")
-                sleep(3)
-                return False
-            else:
-                p("TO_DO: wait_until != logic to be written ,please do not use it now")
-                p("if you are a developer please create one now")
-                return False
-    else:
-        p("checking changes")
-        
-        counter = 0
-        if (condition == "==" and checker != ""):
-            p("checking if the text contains text :"+checker)
-            if(locatorstring.startswith("//")):
-                txtxapth = d.find_element_by_xpath(locatorstring)
-                p("xpaths = "+str(txtxapth))
-                txt = d.find_element_by_xpath(locatorstring).text
-            else:            
-                txt = d.find_element_by_id(locatorstring).text
-            while (txt != checker and counter<sec ):
-                p("this is txt" + txt)
-                p("this is checker"+ checker)
-                counter = counter + iterate
-                sleep(iterate)
-                txt = d.find_element_by_id(locatorstring).text
-            else:
-                if txt == checker and counter<=sec  :
-                    p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
-                    return True
-                else:
-                    p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
-                    return False
-                    
-        elif(condition == "visible" and locatorstring.startswith("//")):
-            p("checking for element visibility")
-            while (len(d.find_elements_by_xpath(locatorstring)) == 0 and counter<sec):
-                counter = counter + iterate
-                sleep(iterate)
-            else:
-                if counter>=sec :
-                    p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
-                    return False
-                else:
-                    p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
-                    return True
-        
-        elif(condition == "visible"):
-            p("checking for element visibility by id")
-            while (len(d.find_elements_by_id(locatorstring)) == 0 and counter<sec):
-                counter = counter + iterate
-                sleep(iterate)
-            else:
-                if counter>=sec :
-                    p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
-                    return False
-                else:
-                    p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
-                    return True
-                
-            # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
-            # p("if you are a developer please create one now")
-        else:
-            if (condition == "==" and checker == ""):
-                p("checker string missing, sleeping 3 for the sake of test")
-                sleep(3)
-                return False
-            else:
-                p("TO_DO: wait_until != logic to be written ,please do not use it now")
-                p("if you are a developer please create one now")
-                return False
+                    if counter>=sec :
+                        p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
+                        return True
             
-
+            elif(condition == "visible"):
+                # p("checking for element visibility by id")
+                while (len(d.find_elements_by_id(locatorstring)) == 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
+                        return True
+                    
+                # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
+                # p("if you are a developer please create one now")
+            # condition -not visible- logic
+            elif(condition == "not visible" and locatorstring.startswith("//")):
+                # p("checking for element visibility")
+                while (len(d.find_elements_by_xpath(locatorstring)) > 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("element with ID/xpath/ "+locatorstring+ " is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ "+locatorstring+ " currently not found. waited for :"+str(counter)+" seconds")
+                        return True
+            
+            elif(condition == "not visible"):
+                # p("checking for element visibility by id")
+                while (len(d.find_elements_by_id(locatorstring)) > 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("element with ID/xpath/ '"+locatorstring+ "' is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ '"+locatorstring+ "'currently not found. waited for :"+str(counter)+" seconds")            
+                        return True
+            
+            
+            else:
+                if (condition == "==" and checker == "" or condition == 'not visible'):
+                    p("checker string missing, sleeping 3 for the sake of test")
+                    sleep(3)
+                    return False
+                else:
+                    p("TO_DO: wait_until != logic to be written ,please do not use it now")
+                    p("if you are a developer please create one now")
+                    return False
+        else:
+            p("checking changes -wait_until")
+            
+            counter = 0
+            if (condition == "==" and checker != ""):
+                p("checking if the text contains text :"+checker)
+                if(locatorstring.startswith("//")):
+                    txtxapth = d.find_element_by_xpath(locatorstring)
+                    p("xpaths = "+str(txtxapth))
+                    txt = d.find_element_by_xpath(locatorstring).text
+                else:            
+                    txt = d.find_element_by_id(locatorstring).text
+                while (txt != checker and counter<sec ):
+                    p("this is txt" + txt)
+                    p("this is checker"+ checker)
+                    counter = counter + iterate
+                    sleep(iterate)
+                    txt = d.find_element_by_id(locatorstring).text
+                else:
+                    if txt == checker and counter<=sec  :
+                        p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
+                        return True
+                    else:
+                        p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
+                        return False
+                        
+            elif(condition == "visible" and locatorstring.startswith("//")):
+                p("checking for element visibility")
+                while (len(d.find_elements_by_xpath(locatorstring)) == 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
+                        return True
+            
+            elif(condition == "visible"):
+                p("checking for element visibility by id")
+                while (len(d.find_elements_by_id(locatorstring)) == 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
+                        return True
+                    
+                # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
+                # p("if you are a developer please create one now")
+            else:
+                if (condition == "==" and checker == ""):
+                    p("checker string missing, sleeping 3 for the sake of test")
+                    sleep(3)
+                    return False
+                else:
+                    p("TO_DO: wait_until != logic to be written ,please do not use it now")
+                    p("if you are a developer please create one now")
+                    return False
+    finally:
+        d.implicitly_wait(10)
+            
 def waitfor(d,locatorstring,s_type = "id",condition = "",sec = 15, iterate = .5):
     '''
     d = self.driver , locatorstring = id/xpath locator ,
@@ -482,10 +524,10 @@ def waitfor(d,locatorstring,s_type = "id",condition = "",sec = 15, iterate = .5)
             # fullstring = d.find_element_by_id(locatorstring)
             
             if (counter<sec and len(d.find_elements_by_id(locatorstring))):
-                p("element with ID/expath/ "+s_type+ " found. waited for :"+str(counter)+" seconds")
+                p("\telement with type "+s_type+ " found. waited for :"+str(counter)+" seconds")
                 return True
             else:
-                p("waited for "+str(counter)+" seconds for "+s_type+ "to be displayed,not found")
+                p("\twaited for "+str(counter)+" seconds for "+s_type+ "to be displayed,not found")
                 return False
    # below may be re writable to above liked code             
     elif s_type == "xpath":
@@ -496,26 +538,26 @@ def waitfor(d,locatorstring,s_type = "id",condition = "",sec = 15, iterate = .5)
             if len(d.find_elements_by_xpath(locatorstring)) == 0:
                 
                 fullstring = d.find_element_by_xpath(locatorstring)
-                p( ":: checked elements = "+str(d.find_elements_by_xpath(locatorstring)))
+                p( "\t:: checked elements = "+str(d.find_elements_by_xpath(locatorstring)))
             
             if (counter<sec):
-                p("element with ID/expath/ "+s_type+ " found. waited for :"+str(counter)+" seconds")
+                p("\telement with ID/expath/ "+s_type+ " found. waited for :"+str(counter)+" seconds")
                 return True
             else:
-                p("waited for "+counter+" seconds for "+s_type+ "to be displayed,xpath element not found")
+                p("\twaited for "+counter+" seconds for "+s_type+ "to be displayed,xpath element not found")
                 return False
                 
     # elif s_type == "class":
-    #     p("checking element with class")
+    #     p("\tchecking element with class")
     elif condition == "text":
-        p("checking if the element has text to be implemented. please use wait_until_changed() instead")
+        p("\tchecking if the element has text to be implemented. please use wait_until_changed() instead")
         
     else:
-        p("#TO_DO : element wise logic to be written.just sleeping for 3 seconds now to ensure running")
-        p("elements passed are :d"+d,"locatorstring"+locatorstring,"s_type = "+s_type,"condition = "+condition,"sec = "+str(sec), "iterate = "+str(iterate))
+        p("\t#TO_DO : element wise logic to be written.just sleeping for 3 seconds now to ensure running")
+        p("\telements passed are :d"+d,"locatorstring"+locatorstring,"s_type = "+s_type,"condition = "+condition,"sec = "+str(sec), "iterate = "+str(iterate))
         sleep(3)
         return "not implemented"
-    # p("")
+    # p("\t")
     while(counter<sec):
         if len(d.find_elements_by_xpath(locatorstring)) == 0 and fullstring.is_displayed():
             return True
@@ -524,17 +566,15 @@ def waitfor(d,locatorstring,s_type = "id",condition = "",sec = 15, iterate = .5)
             
             sleep(iterate)
     if (counter<sec):
-        p("element with ID/expath/ "+s_type+ " could not be found. waited for :"+str(counter)+" seconds")
+        p("\telement with ID/expath/ "+s_type+ " could not be found. waited for :"+str(counter)+" seconds")
     else:
-        p("waited for "+counter+" seconds for "+s_type+ "to be displayed")
-
-        
+        p("\twaited for "+counter+" seconds for "+s_type+ "to be displayed")
+   
 # option parser
 def opts(argv):
     # argv.py
     p(f"Name of the script      : {sys.argv[0]=}")
     p(f"Arguments of the script : {sys.argv[1:]=}")
-    
     
 def printresult(test_name ,res = False):  
       
@@ -580,7 +620,6 @@ def go_and_check_dashboardbalance(d):
     except Exception as e:
         print(e)# e
         
-           
 def back_to_dashboard(d,minimal = False,**kwargs ):
     '''
     d= self.driver
@@ -596,6 +635,9 @@ def back_to_dashboard(d,minimal = False,**kwargs ):
             elif(d.current_activity =='com.bfc.bfcpayments.modules.home.view.DashboardActivity'):
                 print("\nAlready on Dashboard activity , returning True\n")
                 return True
+            elif ('.NexusLauncherActivity' == d.current_activity):
+                print("seems like app crashed")
+                return False
             else:
                 print("not in logged activity")
             d.start_activity("com.bfccirrus.bfcpayments.mobile", "com.bfc.bfcpayments.modules.home.view.DashboardActivity")
@@ -605,6 +647,7 @@ def back_to_dashboard(d,minimal = False,**kwargs ):
                 print("A message is showing in dashboard, it reads -\n",snackbarmessage)
             curractivity = d.current_activity
             if("com.bfc.bfcpayments.modules.home.view.DashboardActivity"== curractivity):
+                walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
                 p("dashboard view success")
                 return True
             else:
@@ -652,8 +695,7 @@ def back_to_dashboard(d,minimal = False,**kwargs ):
             # fail case to be written in calling method
             pass
         
-        
-        
+# this definition flow is changed.    
 # def is_project_text_present(self, text):
 #         #return str(text) in self.driver.page_source
 #         try:
@@ -662,23 +704,22 @@ def back_to_dashboard(d,minimal = False,**kwargs ):
 #             return False
 #         return "test001" in text # check if the project title text test001 is in the page, return true if it is
 
-
-
 def scroll_down_to_view(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
-    ''' pass the locator it will scroll until visible condition met
+    ''' pass the locatorstring it will scroll until visible condition met
         if scrollpoint is not defined , it will consider it as a page or 
         if it has an value it is considered an element. and swipe will start from that 
         specific point.:::new app compatible:::
     '''
     #setting the points
+    print("attempting scroll down")
     if start_x == 0 and start_y == 0:
-        p("scrollpoint not defined,assuming it is a page scroll")
+        p("\tscrollpoint not defined,assuming it is a page scroll")
         start_x=28
         start_y=646
         end_x=37
         end_y=462 #small swipe up points
     else:
-        p("scroll point defined")
+        p("\tscroll point defined")
     # strating to scroll
     endOfPage = False
     previousPageSource = d.page_source
@@ -687,23 +728,23 @@ def scroll_down_to_view(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
     if "//" in element:
         type = "xpath"
         if(element.startswith("//")):
-            p("element is a direct xpath")
+            p("\telement is a direct xpath")
         try:
             if(len(d.find_elements_by_xpath(element))>0): 
                 elem = d.find_element_by_xpath(element)
             else:
-                p("element is not shown in the ui, check if the matter is of visibility")
+                p("\telement is not shown in the ui, check if the matter is of visibility")
         except NoSuchElementException as e:
-            p("element not found but passing the exception in if")
+            p("\telement not found but passing the exception in if")
             pass
     else:
         try:
             if(len(d.find_elements_by_id(element))>0): 
                 elem = d.find_element_by_id(element)
             else:
-                p("element is not shown in the ui ,check if the matter is of visibility")
+                p("\telement is not shown in the ui ,check if the matter is of visibility")
         except NoSuchElementException as e:
-            p("element not found but passing the except in else")
+            p("\telement not found but passing the except in else")
             pass
     x= 0
     while (not endOfPage):
@@ -712,20 +753,20 @@ def scroll_down_to_view(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
             if(value>0):
                 elem = d.find_element_by_xpath(element)
                 if(elem.is_displayed()):
-                    p("element is displayed")
+                    p("\telement is displayed")
                     break
                 else:
-                    p("element is present but not displayed")
+                    p("\telement is present but not displayed")
         elif type == "id":
             value = len(d.find_elements_by_id(element)) # list array len to check elements
             if(value>0):
                 elem = d.find_element_by_id(element)
                 if(elem.is_displayed()):
-                    p("element is displayed")
+                    p("\telement is displayed")
                     break
                 else:
-                    p("element is present but not displayed")
-        p("element not found , scrolling "+"⢀"*x ,  end="\r")
+                    p("\telement is present but not displayed")
+        p("\telement not found , scrolling "+"⢀"*x ,  end="\r")
         x=x+1
         sleep
         d.swipe(start_x, start_y, end_x, end_y, duration=300) #small swipe up
@@ -733,50 +774,81 @@ def scroll_down_to_view(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
         previousPageSource = d.page_source
     else:
         if value>0 and elem.is_displayed():
-            p("element found")
+            p("\telement found")
             return True
         else:
-            p("element not found")
+            p("\telement not found")
             return False
+def scroll_to_top(d):
+        start_x=20
+        start_y=462
+        end_x=20
+        end_y=646
+        endOfPage = False
+        previousPageSource = d.page_source
+        x=0
+        try:
+            while (not endOfPage):
+                
+                d.swipe(start_x, start_y,end_x, end_y, duration=600) #small swipe up
+                endOfPage = previousPageSource == d.page_source #false until end of page
+                previousPageSource = d.page_source
+                p("\telement not found , scrolling "+"⢀"*x ,  end="\r")
+                x=x+1
+            print("")
+        except Exception as e:
+            print(e)
+            pass
         
-def scroll_on_element(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
-    p("trying to scroll on screen")
+def scroll_on_element(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0,topelement = ''):
+    p("\ttrying to scroll on screen")
     endOfPage = False
     previousPageSource = d.page_source
     type = "id"
-    
-    if start_x == 0 and start_y == 0:
-        p("scrollpoint not defined,assuming it is a page scroll")
-        start_x=28
-        start_y=646
-        end_x=37
-        end_y=462 #small swipe up points
+    if topelement != '':
+        try:
+            scroll_on_element(d,topelement, end_x, end_y,start_x, start_y)
+            print("\tscrolling to top completed now scrolling to element")
+            scroll_on_element(d,element,start_x ,start_y, end_x ,end_y )
+        except:
+            pass
+    # if start_x == 0 and start_y == 0 and direction is not 'invert_first':
+    #     p("\tscrollpoint not defined,assuming it is a page scroll down")
+    #     start_x=28
+    #     start_y=646
+    #     end_x=37
+    #     end_y=462 #small swipe up points
+    elif start_x == 0 and start_y == 0 : #and direction is 'invert': removing extra check in case of accidental type
+        print("\tscrollpoint not defined,assuming it is a page scroll ")
+        start_x=37
+        start_y=462
+        end_x=28
+        end_y=646
     else:
-        p("scroll point defined")
+        p("\tscroll point defined")
         
     if "//" in element:
         type = "xpath"
         if(element.startswith("//")):
-            p("element is a direct xpath")
+            p("\telement is a direct xpath")
         try:
             if(len(d.find_elements_by_xpath(element))>0): 
                 elem = d.find_element_by_xpath(element)
             else:
-                p("element is not shown in the ui, check if the matter is of visibility")
+                p("\t\element is not shown in the ui, check if the matter is of visibility")
         except NoSuchElementException as e:
-            p("element not found but passing the exception in if")
+            p("\telement not found but passing the exception in if")
             pass
     else:
         try:
             if(len(d.find_elements_by_id(element))>0): 
                 elem = d.find_element_by_id(element)
             else:
-                p("element is not shown in the ui ,check if the matter is of visibility")
+                p("\telement is not shown in the ui ,check if the matter is of visibility")
         except NoSuchElementException as e:
-            p("element not found but passing the except in else")
+            p("\telement not found but passing the except in else")
             pass
-    
-    
+
     x= 0
     while (not endOfPage):
         if type == "xpath": #xpath flow
@@ -785,20 +857,20 @@ def scroll_on_element(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
             if(value>0):
                 elem = d.find_element_by_xpath(element)
                 if(elem.is_displayed()):
-                    p("element is displayed")
+                    p("\telement is displayed")
                     break
                 else:
-                    p("element is present but not displayed")
+                    p("\telement is present but not displayed")
         elif type == "id":
             value = len(d.find_elements_by_id(element)) # list array len to check elements
             if(value>0):
                 elem = d.find_element_by_id(element)
                 if(elem.is_displayed()):
-                    p("element is displayed")
+                    p("\telement is displayed")
                     break
                 else:
-                    p("element is present but not displayed")
-        p("element not found , scrolling "+"⢀"*x ,  end="\r")
+                    p("\telement is present but not displayed")
+        p("\telement not found , scrolling "+"⢀"*x ,  end="\r")
         x=x+1
         # sleep
         d.swipe(start_x, start_y, end_x, end_y, duration=600) #small swipe up
@@ -806,13 +878,13 @@ def scroll_on_element(d,element,start_x = 0,start_y=0 , end_x = 0,end_y = 0):
         previousPageSource = d.page_source
     else:
         if value>0 and elem.is_displayed():
-            p("element found")
+            p("\telement found")
             return True
         else:
-            p("element not found")
+            p("\telement not found")
             return False
         
-        
+# asserts and print results on given values       
 def checkassert(d,element,condition = "",checker="",assertname = "assert"):
     '''
     returns boolean
@@ -836,6 +908,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
     
     elemstr = "*** Function Object ***" if element is None else str(element) # to avoid conflict in prints
     print("element string in checkassert",elemstr)
+# == condition
     if condition == "==":
         #format first:::
         if type(element) == float or type(checker) == float:
@@ -850,7 +923,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
                 return True
             else:
                 p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" '==' "+assertname+" FAILED"+CRESET)
-                p("element : "+elemstr+" != " +str(checker))
+                p("\t\telement : "+elemstr+" != " +str(checker))
                 assert_count["FAIL"] += 1                 
                 return False
         elif(type(element) is bool or type(checker) is bool):
@@ -865,7 +938,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
                 #     return False
                 # else:
                 p(RED+" ❌ "+CRESET +" "+PURPLE+str(elemstr)+ " '==' "+assertname+" FAILED"+CRESET)
-                p("element : "+str(elemstr)+" != " +str(checker))
+                p("\t\telement : "+str(elemstr)+" != " +str(checker))
                 assert_count["FAIL"] += 1                 
                 return False
  
@@ -881,14 +954,15 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
         else : # element not = checker assert failed
             if len(elemstr) > 60:
                 p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" '==' "+assertname+" FAILED"+CRESET)
-                p("element : "+elemstr+" != " +str(checker))
+                p("\t\telement : "+elemstr+" != " +str(checker))
                 assert_count["FAIL"] += 1                 
                 return False
             else:
                 p(RED+" ❌ "+CRESET +" "+PURPLE+elemstr+ " '==' "+assertname+" FAILED"+CRESET)
-                p("element : "+elemstr+" != " +str(checker))
+                p("\t\telement : "+elemstr+" != " +str(checker))
                 assert_count["FAIL"] += 1                 
                 return False
+# != condition    
     elif condition == "!=":
         # p(RED+" NOT IMPLEMENTED"+CRESET)
         checker = str(checker)
@@ -904,14 +978,15 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
         else : # element not = checker assert failed
             if len(elemstr) > 60:
                 p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" '!=' "+assertname+" FAILED"+CRESET)
-                p("element : ",elemstr," != " ,checker)
+                p("\t\telement : ",elemstr," != " ,checker)
                 assert_count["FAIL"] += 1                 
                 return False
             else:
                 p(RED+" ❌ "+CRESET +" "+PURPLE+elemstr+ " '!=' "+assertname+" FAILED"+CRESET)
-                p("element : "+elemstr+" != " +checker)
+                p("\t\telement : "+elemstr+" != " +checker)
                 assert_count["FAIL"] += 1                 
                 return False
+# contains condition for texts   
     elif(condition == 'contains'):
         if (isinstance(element, str) and isinstance(checker, str)):
             if checker.casefold() in element.casefold() :
@@ -941,6 +1016,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             p("ype of element : "+type(elemstr)+" and type of checker : " +type(checker))
             assert_count["FAIL"] += 1                 
             return False
+# not contains - condition for texts    
     elif(condition == 'not contains'):
         if (isinstance(element, str) and isinstance(checker, str)):
             if checker.casefold() not in element.casefold() :
@@ -970,10 +1046,15 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             p("type of element : "+type(elemstr)+" and type of checker : " +type(checker))
             assert_count["FAIL"] += 1                 
             return False
+#visibility check without check
     elif((condition == '' or condition == 'visible' )and checker == '')  :
         try:
-            print("checking element visibility")
-            if element.is_displayed():
+            print("checking element visibility") 
+            print(element.get_attribute('displayed') , " for element visibility")
+            # element.get_attribute('visibility') == 'visible'  #visibility	visible
+            if (element.get_attribute('displayed') or element.is_displayed()) :
+                print("element text is ",element.get_attribute('text'))
+                element = element.get_attribute('text') if element.get_attribute('text') is not None else ...
                 if len(elemstr) > 60:
                     p(GREEN+" ✓ "+CRESET + " "+CYAN+elemstr[0:20]+"..."+elemstr[-20:]+" ' is VISIBLE ' {"+checker+"} : "+assertname+" passed"+CRESET)
                     assert_count["PASS"] += 1 
@@ -997,16 +1078,16 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
                 
         except Exception as e :
             p(RED +" ❌ Element not found in DOM "+CRESET)
+            save_screenshot(d,"checkassert_"+assertname)
             print(e)
             # p("ype of element : "+type(elemstr)+" and type of checker : " +type(checker))
             assert_count["FAIL"] += 1                 
             return False
+# catch any unfound condition
     else:
         p("checkassert conditions not met")
         p('Element:',element,'\ncondition :',condition,'\nchecker :',checker,'\nassertname:',assertname)
-            
-            
-        
+                  
 def callerfunction(d):
     return inspect.stack()[1].function
 
@@ -1113,99 +1194,105 @@ def getclickfunction(d,activity):
         if caller in yml[module]['events']:
             firstdef = list(yml[module]['events'].keys())[0]
             
-            
-def check_and_waitforprogressbar(d , sec = 12 , iter = 1,maximum_wait_time =60):
+#checks and waits for progress bar if found else returns false      
+def check_and_waitforprogressbar(d , sec = 7 , iter = 1,maximum_wait_time =60):
     '''returns bool if progress bar found
     TRUE IF NOT FOUND ELSE FALSE
         waits till progress bar in visible or until time reach    
     '''
     p("waiting for progress bar")
-    firstcounter = 0
-    secondcounter = 0
-    found = False
-    while firstcounter < sec :
-        if(len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0):
-            p("progress bar found in pagesource , checking for visibility")
-            found = True
-            break
-        else:
-            
-            # p("progress bar NOT found in pagesource , checking ")
-            p("progress bar NOT found in pagesource , checking ","⢀"*int(firstcounter),  end="\r")
-            sleep(iter)
-            # return False       visibility	visible  
-            
-        firstcounter +=iter
-    sleep(1)  
-    snackbarfound,snackbartext =  check_snackbar(d,3)
-    if snackbarfound:
-        print("\n",YELLOW,snackbartext,CRESET,"\n")
-    if firstcounter >= sec and len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0:
-        print(RED+"\nTOOK TOO LONG TO LOAD , THIS SHOULD NOT HAPPEN FREQUENTLY '"+str(firstcounter)+"seconds'"+CRESET)
-        return False
-    elif found : 
-        p("checking and waiting for progress bar to disappear if visible")
-        try:
-            # wait = WebDriverWait(d, 8)
-            # wait.until(expected_conditions.presence_of_element_located((By.ID, "productPrice")))
-            # d.find_element_by_id("productPrice").is_displayed()
-            pbar = d.find_element_by_class_name('android.widget.ProgressBar')
-        except NoSuchElementException as e:
-            print("progress loader is not visible now , check complete")
-            return True
-        except StaleElementReferenceException as e:
-            print("Progres bar not in DOM")
-            pass
-        
-        p("progress bar visibility = "+str(pbar.is_displayed()))
-        
-        try:
-            while (secondcounter < maximum_wait_time) and len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0:
-                if pbar.is_displayed() :
-                        print("progress bar waiting to be invisible"+"."*secondcounter,end='\r')          
-                        secondcounter +=iter
-                        sleep(iter)
-                else:
-                        # print("progress bar is not in view , waited for "+secondcounter+" seconds")
-                        secondcounter +=iter
-                        sleep(iter)
+    try:
+        d.implicitly_wait(1)
+        firstcounter = 0
+        secondcounter = 0
+        found = False
+        while firstcounter < sec :
+            if(len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0):
+                p("progress bar found in pagesource , checking for visibility")
+                found = True
+                break
             else:
-                print("\n")
-                snackbarfound,snackbartext =  check_snackbar(d,3)
-                if snackbarfound:
-                    print("\n",YELLOW,snackbartext,CRESET,"\n")
-                            
-                if((len(d.find_elements_by_class_name('android.widget.ProgressBar'))<=0) and (secondcounter < maximum_wait_time) ):
-                    print("progress bar is not in view , waited for "+str(secondcounter)+" seconds")
-                    return True
-                elif (pbar.is_displayed() ) and (secondcounter >= maximum_wait_time):
-                    print("maximum wait time reached ,waited for "+str(maximum_wait_time))
-                    return False
-                elif(secondcounter < maximum_wait_time) and (pbar.is_displayed() is not True):
-                    print("progress bar is not in view , waited for "+str(secondcounter)+" seconds")
-                    ###################################
-                    # TO_DO : check for snackbar
-                    #####################################
-                    return True
+                
+                # p("progress bar NOT found in pagesource , checking ")
+                p("progress bar NOT found in pagesource , checking ","⢀"*int(firstcounter),  end="\r")
+                sleep(iter)
+                # return False       visibility	visible  
+                
+            firstcounter +=iter
+        sleep(1)  
+        print('')
+        snackbarfound,snackbartext =  check_snackbar(d,3)
+        if snackbarfound:
+            print("\n",YELLOW,snackbartext,CRESET,"\n")
+        if firstcounter >= sec and len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0:
+            print(RED+"\nTOOK TOO LONG TO LOAD , THIS SHOULD NOT HAPPEN FREQUENTLY '"+str(firstcounter)+"seconds'"+CRESET)
+            return False
+        elif found : 
+            p("checking and waiting for progress bar to disappear if visible")
+            try:
+                # wait = WebDriverWait(d, 8)
+                # wait.until(expected_conditions.presence_of_element_located((By.ID, "productPrice")))
+                # d.find_element_by_id("productPrice").is_displayed()
+                pbar = d.find_element_by_class_name('android.widget.ProgressBar')
+            except NoSuchElementException as e:
+                print("progress loader is not visible now , check complete")
+                return True
+            except StaleElementReferenceException as e:
+                print("Progres bar not in DOM")
+                pass
+            
+            p("progress bar visibility = "+str(pbar.is_displayed()))
+            
+            try:
+                while (secondcounter < maximum_wait_time) and len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0:
+                    if pbar.is_displayed() :
+                            print("progress bar waiting to be invisible"+"."*secondcounter,end='\r')          
+                            secondcounter +=iter
+                            sleep(iter)
+                    else:
+                            # print("progress bar is not in view , waited for "+secondcounter+" seconds")
+                            secondcounter +=iter
+                            sleep(iter)
                 else:
-                    print(RED+"\tERROR OCCURED IN PROGRESS BAR CHECK"+CRESET)     
-                    return False     
-        except NoSuchElementException as e:
-            print("progress loader is not visible now , check complete")
-            return True
-        except StaleElementReferenceException as e:
-            print("\nprogress not in DOM,success")
-            return True
-     
-         
-    else:
-        print("\nprogressbar not found, waited for '"+str(firstcounter)+" seconds'")
-        return False
+                    print("\n")
+                    snackbarfound,snackbartext =  check_snackbar(d,3)
+                    if snackbarfound:
+                        print("\n",YELLOW,snackbartext,CRESET,"\n")
+                                
+                    if((len(d.find_elements_by_class_name('android.widget.ProgressBar'))<=0) and (secondcounter < maximum_wait_time) ):
+                        print("progress bar is not in view , waited for "+str(secondcounter)+" seconds")
+                        return True
+                    elif (pbar.is_displayed() ) and (secondcounter >= maximum_wait_time):
+                        print("maximum wait time reached ,waited for "+str(maximum_wait_time))
+                        return False
+                    elif(secondcounter < maximum_wait_time) and (pbar.is_displayed() is not True):
+                        print("progress bar is not in view , waited for "+str(secondcounter)+" seconds")
+                        ###################################
+                        # TO_DO : check for snackbar
+                        #####################################
+                        return True
+                    else:
+                        print(RED+"\tERROR OCCURED IN PROGRESS BAR CHECK"+CRESET)     
+                        return False     
+            except NoSuchElementException as e:
+                print("progress loader is not visible now , check complete")
+                return True
+            except StaleElementReferenceException as e:
+                print("\nprogress not in DOM,success")
+                return True
         
+            
+        else:
+            print("\nprogressbar not found, waited for '"+str(firstcounter)+" seconds'")
+            return False
+    finally:
+        d.implicitly_wait(10)
         
+#check if any snackbar found when called and prints its results 
 def check_snackbar(d,sec =5,iter =0.5,minimal = False):                                                                                  
     '''checks alert /snackbar , returns false if not found'''
     try:
+        d.implicitly_wait(1)
         driver =d
         alertid = "com.bfccirrus.bfcpayments.mobile:id/snackbar_text"
                     #    com.bfccirrus.bfcpayments.mobile:id/snackbar_text
@@ -1237,10 +1324,11 @@ def check_snackbar(d,sec =5,iter =0.5,minimal = False):
             print("alert message is : \n", e.message)
             print("in page : ",e.test_name)
         return True ,e.message
+    finally :
+        d.implicitly_wait(10)
         
 def has_kwargs(kwargs):
     return True if int(kwargs.__len__()) != 0 else False
-
 
 def exceltestreport(key,feedername = None):
     '''
@@ -1268,7 +1356,7 @@ def exceltestreport(key,feedername = None):
     
 def feederreport(key= '',feedername = ''):
     # global feedercheck
-    print("passed key is," ,key)
+    print("passed key to feeder report is," ,key)
     if key == '':
         for key,value in feedercheck.items():
             
@@ -1490,23 +1578,28 @@ def check_progressbar(d): #: , sec = 12 , iter = 1,maximum_wait_time =60):
         # wait = WebDriverWait(d, 8)
         # wait.until(expected_conditions.presence_of_element_located((By.ID, "productPrice")))
         # d.find_element_by_id("productPrice").is_displayed()
+        d.implicitly_wait(7)
         pbar = d.find_element_by_class_name('android.widget.ProgressBar')
-        print("maybe we need to check ")
+        print("checking for snackbar after load")
+        # print("maybe we need to check ")
+        
         print(pbar)
         snackbarfound,snackbartext =  check_snackbarv2(d,3)
         if snackbarfound:
-            print(snackbartext)
+            print(YELLOW +snackbartext+ CRESET)
+        
     except NoSuchElementException as e:
+        d.implicitly_wait(10)
         print("progress loader is not visible now , check complete")
         return True
     except StaleElementReferenceException as e:
+        d.implicitly_wait(10)
         print("Progres bar not in DOM")
         pass
+    else: #trying this in case of loader takes too time idea is if those 
+        check_progressbar(d)
 
-    
-    
-    
-    
+
     # if(len(d.find_elements_by_class_name('android.widget.ProgressBar'))>0):
     #     p("progress bar found in pagesource , checking for visibility")
     #     found = True
@@ -1584,9 +1677,7 @@ def check_progressbar(d): #: , sec = 12 , iter = 1,maximum_wait_time =60):
     # else:
     #     print("\nprogressbar not found, waited for '"+str(firstcounter)+" seconds'")
     #     return False
-    
-    
-    
+  
 def check_snackbarv2(d,sec =5,iter =0.5,minimal = False):                                                                                  
     '''checks alert /snackbar , returns false if not found'''
     try:
@@ -1608,6 +1699,41 @@ def check_snackbarv2(d,sec =5,iter =0.5,minimal = False):
             print("in page : ",e.test_name)
         return True ,e.message
 
+def format_csv(csvpath):
+    
+    try:
+        ######################## formatting csv ########################
+        import csv
+        from os.path import exists as file_exists
+        # |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| #
+        if file_exists(csvpath):
+            print("csv file exists  in \n",{csvpath})
+        else:
+            print(RED+"csv file does not exists  in \n",{csvpath},CRESET)
+            raise  FileNotFoundError("file not found at "+csvpath+"\n\n")
+            
+
+        with open(csvpath, mode='r') as inp:
+            reader = csv.reader(inp)
+            header  = next(reader)
+            global fcsv
+            fcsv = dict()
+            for row in reader:
+                print("reading :",row)
+                fcsv.update({row[1]: dict()})
+                try:
+                    for x in range(len(header)):
+                        fcsv[row[1]].update({header[x]:row[x]})
+                except IndexError:
+                    fcsv[row[1]].update({header[x]:""})
+                    continue#checking for empty values
+        return fcsv
+        # print(fcsv)
+        ##############################################
+    except FileNotFoundError as e:
+        print (e)
+    except Exception as e:
+        print(e)
 
 
 

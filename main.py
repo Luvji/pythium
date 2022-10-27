@@ -285,12 +285,13 @@ class Bfc():
                     activity = serialiseractivity[n]
                     k=serialiser[n] 
                     v = page = serialiserpages[n]
-
-                    if activity == '.NexusLauncherActivity' and occurance > 0:
+                    sleep(2)
+                    if self.driver.current_activity == '.NexusLauncherActivity' and occurance > 0:
                         print("seems app is a out of app , sleeping unconditionally for 5 seconds")
                         sleep (5)
                         # print("\n\033[42mexcecuting test \033[104m" +k+ "\033[42m from page -> " + v +" ;on screen "+page+"\033[0m")
-                    if activity != '.NexusLauncherActivity':
+                    print("activity check = ",activity)
+                    if self.driver.current_activity != '.NexusLauncherActivity':
                         # normal flow.
                         print("\n\033[42mexcecuting test \033[104m" +k+ "\033[42m from page -> " + v +" ;next screen "+page+"\033[0m")
                         print("test "+k+" started")
@@ -315,7 +316,7 @@ class Bfc():
                     else:
                         # print("\n\033[196mexcecuting test \033[104m" +"this is k"+ "\033[196m from page -> " + "v" +" ;next screen "+"page"+"\033[0m")
                         print("\n\033[1;41mExecution of TEST: \033[104m"+k+"\033[1;41m Failed,from page -> "+v+" ;on screen "+page+"\033[0m")
-                        print("\033[1;41m Seems App crashed \033[0m")
+                        print("\t\t\033[1;41m Seems App crashed \033[0m")
                         occurance += 1
                         ret = False
                     if ret == True :

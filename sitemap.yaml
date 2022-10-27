@@ -2,14 +2,40 @@
 # ---
 #page
 #implement activity within sitemap
-login:    
-#page_actions  
-  activity: "" 
-  entrypoint: signin_with_cpr      
+general:
+  activity: ""
+  entrypoint: ""
   events:
-  #test name : entrypoint page
-    signin_with_cpr: dashboard
-    click_paybills: paybills
+    register_with_cpr: dashboard
+    click_add_money: wallet
+    add_money_to_wallet_from_card_by_BHD_20_button: wallet
+    # click_cards: cards
+
+
+
+
+
+
+    # signout: dashboard
+# wallet:
+#   activity: ""
+#   entrypoint: ""
+#   events:
+# cards:
+#   activity: ""
+#   entrypoint: ""
+#   events:
+#     click_cards: cards
+#     register_cards: cards
+
+# login:    
+# #page_actions  
+#   activity: "" 
+#   entrypoint: signin_with_cpr      
+#   events:
+#   #test name : entrypoint page
+#     register_with_cpr: dashboard
+#     click_paybills: paybills
 #add a function to redirect to value screen
 # dashboard:
 #   activity: "com.bfc.bfcpayments.modules.home.view.DashboardActivity"

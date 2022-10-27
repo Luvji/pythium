@@ -4,7 +4,8 @@ from inspect import getmembers, isfunction
 # from payments import *
 from dashboard import *
 from login import *
-# from wallet import *
+from cards import *
+from wallet import *
 # from tabib import *
 # from tqdm import tqdm
 # from paybywallet import *
