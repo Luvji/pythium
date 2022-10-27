@@ -41,9 +41,10 @@ parent_dir = os.getcwd()
 
 #unknownThomas
 loggedcpr = '910425100'
-loggedmobile = '31336369'
-loggeddob = '2009-01-02'
+loggedmobile = '31111300'
+loggeddob = ['2009-03-10','2010-09-19','2009-03-20']
 loggedname = 'Thomas'
+loggedpassport = 'hiqk41922'
 
 #davis #avenues enabled
 # loggedcpr = '871275287'
@@ -61,10 +62,15 @@ loggedname = 'Thomas'
 
 
 loggeduserpin = '123321'
-dob = loggeddob.rsplit("-") #['2009', '03', '20']
-bday =  dob[2]    #format dd
-bmonth =  dob[1]  #format mm
-byear =  dob[0] #format yyyy
+if isinstance(loggeddob, str):
+    dob = loggeddob.rsplit("-") #['2009', '03', '20']
+    bday =  dob[2]    #format dd
+    bmonth =  dob[1]  #format mm
+    byear =  dob[0] #format yyyy
+
+    lastbday =  ""    #format dd
+    lastbmonth =  ""  #format mm
+    lastbyear =  "" #format yyyy
 
 # optparser variable
 # global force
@@ -79,16 +85,17 @@ addmoneyupperlimit = 3999
 loggedotp = '111111'
 cardnumber = "460041123"+str( randint(1000000,9999999)) # 460041<10digits>
 cardholdername = "redlohdrac eman"
-nofailtestcase = ["signin_with_cpr"] # if this fails close this test ,without running anything else
+nofailtestcase = ["register_with_cpr",'feed_signin'] # if this fails close this test ,without running anything else
 walletbal = 0 #update whenever possible
 #cpr number generated to transfer money by
 sendtocpr = [790241401,871275287,840160550]
 selectedsendtocpr = random.choice(sendtocpr)
 outputpath = os.path.join(parent_dir, "Output")
 fcsv = {} #from CSV
+
 # feedercheck ={'tc':list()} #  dict{'tc':list[{k1:v1,k2:v2},{k1:v1,k2:v2},{k1:v1,k2:v2}]}
 
-feedercheck ={'paybywallet':list(),'addmoney':list()}
+feedercheck ={'paybywallet':list(),'addmoney':list(),'login':list()}
 feedercheck['pass'] = 0
 feedercheck['fail'] = 0#  dict{'tc':list[{k1:v1,k2:v2},{k1:v1,k2:v2},{k1:v1,k2:v2}]}
 feederexceloutput = ''
@@ -97,7 +104,7 @@ check = {"pass" : 0 , "fail" : 0 ,"warn": 0,"w_test":[], "p_test" : [] , "f_test
 
 #paths
 #parent dir /app/*.apk
-apkpath = os.path.join(parent_dir, 'app','app-uat (3).apk')
+apkpath = os.path.join(parent_dir, 'app','app-uat.apk')
 #log file path C:\Users\Administrator\Desktop\pyppium\Output\2022-09-01\log\screenshots
 # logpath = "" #changed name to to session log file
 # yaml path 
@@ -117,13 +124,15 @@ path1 = outputpath #os.path.join(parent_dir, "Output")
 path2 = os.path.join(path1, date)
 #screenshot folder for current session - pyppium/Output/{date}/log/screenshots
 path3 = os.path.join(path2,"log","screenshots")
-path4 = os.path.join(path2,"data")
+path4 = datapath = os.path.join(path2,"data")
+excelpath = ""
+userdata = ''
 # global outputtime,outputdate # for logger date and time
 outputdate = date
 outputtime = str(datetime.now().strftime("%H-%M-%S"))
 # path to create excel output
 outputexcelpath = path2
-
+expectedloginflow = ['changemobile','shufti','passport']
 sessionlogfile =os.path.join(path2,"log", outputtime+'_log.txt')    
 
 
@@ -132,5 +141,6 @@ sessionlogfile =os.path.join(path2,"log", outputtime+'_log.txt')
 dashboardactivity = "com.bfc.bfcpayments.modules.home.view.DashboardActivity"
 signupactivity = "com.bfc.bfcpayments.modules.onboarding_journey.view.ui.SignUpSliderActivity"
 SplashScreenActivity= "com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity"
+cardsactivity = 'com.bfc.bfcpayments.modules.card.CardActivity'
 
 

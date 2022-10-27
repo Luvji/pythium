@@ -14,6 +14,10 @@ class failed(Error):
         super().__init__(self.message)
         
 class splashloadtooklong(Exception):
+    def __init__(self,  message="splash took too long"):
+        self.message = message
+        print(message)
+        super().__init__(self.message)
     pass
 
 class noelement(Error):
