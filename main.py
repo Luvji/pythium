@@ -10,7 +10,10 @@ from util import p
 
 
 alldir = dir()
+teststartedtime = datetime.now()
+print('Test started at : ',teststartedtime)
 print("connecting to appium server")
+
 print("initialising connection : please wait..!")
 multidef = []
 nodef = []
@@ -25,7 +28,7 @@ targumentList = sys.argv[1:]
 noreset = False
 no_run =False
 no_fun = True
-long_options = ["help","no-reset","no-run","printErrors","fun","force","feederhtmloutput","feederexceloutput","testreports"]
+long_options = ["help","no-reset","no-run","printErrors","fun","force","feederhtmloutput","feederexceloutput","testreports","debug-apk"]
 
 unrecognisedlist = []
 recognised = []
@@ -94,6 +97,9 @@ try:
             print (("all testreports will be save to a file , feeder result will be save as excel file(.xlsx), and a HTML. (% s) ::") % (currentValue))
             feederexceloutput = True
             feederhtmloutput = True
+        elif currentArgument in ('--debug-apk'):
+            print("switched to debug apk , ensure path ",YELLOW,debugapkpath,CRESET,"is up-to-date")
+            apkpath = debugapkpath
                        
 except getopt.error as err:
     # output error, and return with an error code
@@ -102,6 +108,7 @@ except getopt.error as err:
     print (str(err))
     pass
     
+print("apk located at ",apkpath)
 if( not no_fun):   
     credits()
 else:
@@ -281,7 +288,7 @@ class Bfc():
             self.driver.implicitly_wait(10)
             try:
                 for n in range(len(serialiser)) :
-                    
+                    testnumber = n+1
                     activity = serialiseractivity[n]
                     k=serialiser[n] 
                     v = page = serialiserpages[n]
@@ -293,23 +300,32 @@ class Bfc():
                     print("activity check = ",activity)
                     if self.driver.current_activity != '.NexusLauncherActivity':
                         # normal flow.
-                        print("\n\033[42mexcecuting test \033[104m" +k+ "\033[42m from page -> " + v +" ;next screen "+page+"\033[0m")
-                        print("test "+k+" started")
+                        
+                        print("\n"+str(testnumber)+".\033[42mExcecuting test \033[104m" +k+ "\033[42m from page -> " + v +" ;next screen "+page+"\033[0m")
+                        print("\tTest - \x1b[4;30;42m"+k+"'\x1b[0m started")
                         print(":"*os.get_terminal_size().columns)
      
                         # print("this is check before eval",check,"\n\n\n")
+                        teststarttime = datetime.now()
                         ret = eval(k)(self)  
-                        print("this is return of formatted serialiser",ret)
+                        testendtime = datetime.now()
+                        
+                        print("\x1b[7;32;40mELAPSED TIME : ",testendtime - teststarttime, '.\x1b[0m returned :',ret)
                         print("checking if it is a important test case fail :", ret is not True and k in nofailtestcase)
                         if ret is not True and k in nofailtestcase:
+                            if ret == False :
+                                check["fail"] = check["fail"] + 1
+                                check["f_test"].append(k)
+                            else:
+                                print("testcase return value is ",ret)
+                                check["warn"] = check["warn"] + 1
+                                check["w_test"].append(k)
                             p(RED+":"*os.get_terminal_size().columns)
                             p(RED+"this TESTCASE is marked as important, and should never FAILED,")
                             p(RED+":"*os.get_terminal_size().columns)
                             p(CRESET)
                             break
                             # self.stop()
-                            
-                            
                         testsran = testsran + 1
                         activity = self.driver.current_activity
                         print("ACTIVITY",activity)
@@ -343,6 +359,7 @@ class Bfc():
 
 # ---START OF SCRIPT
 if __name__ == '__main__':
+    
     print("script started")
     print("testran",testsran)
     
@@ -386,4 +403,9 @@ if __name__ == '__main__':
         # tests.stop()
     else:
         p("TESTS NOT EXECUTED ON --no-run")
+    endtime = datetime.now()
+    print(YELLOW+'-'*int(os.get_terminal_size().columns)+CRESET)
+    print("\033[1mRUN started : ",teststartedtime,"\nRUN Ended : ",endtime)
+    print('ELAPSED TIME = ',endtime-teststartedtime)
+    print(YELLOW+'-'*int(os.get_terminal_size().columns)+CRESET)
 

@@ -33,6 +33,9 @@ GREYONRED = '\x1b[0;30;41m'
 WHITEONRED = '\x1b[1;37;41m'
 assert_count = { "PASS":0,"FAIL":0 }
 middlespace = " "*int(os.get_terminal_size().columns/3)
+visible = 'visible'
+notvisible = 'notvisible'
+
 # these are utility functions defined for test pages. write utility or recursive function in this  
 
 def centerofcmd(text="",pos=True):
@@ -125,6 +128,9 @@ def save_screenshot(d, test_name):
     # path1 = os.path.join(parent_dir, pathoutput)
     # path2 = os.path.join(path1, date)
     # path3 = os.path.join(path2,"screenshots")
+    if ('.NexusLauncherActivity' == d.current_activity):
+        print( BLACKONRED+"\n\n"+middlespace+"seems like app crashed\n\n"+CRESET)
+    
     scname = os.path.join(path3,current_time+test_name)
     p(scname)
     path =scname+".png"
@@ -137,6 +143,7 @@ def save_screenshot(d, test_name):
 
 def testcasereport(testname,status,msg = "No message provided"):
     msg = "Message : "+str(msg)
+    testStatus = ''
     if status in ['fail','Fail','FAIL','failed','Failed','FAILED',False]:
         testStatus = "\033[1mTEST STATUS |" + testname +"|"+RED+str(status)+CRESET
         p("="*os.get_terminal_size().columns)
@@ -153,6 +160,10 @@ def testcasereport(testname,status,msg = "No message provided"):
         p("="*os.get_terminal_size().columns)
         p(testStatus+" | "+msg)
         p("="*os.get_terminal_size().columns)
+    with open( testlogfile ,'a+',encoding="utf-8") as file:
+        print('XXX XXX XXX XXX', file=file)
+        
+        print(testStatus+" | "+msg, file=file)
 
 def printred(msg):
     p(" \033[;33m ")
@@ -162,6 +173,11 @@ def printred(msg):
 def printblue(msg):
     p("\033[0;34m")
     p(msg+"\033[0m")
+def p_to_tslog(*args, **kwargs):
+    
+    with open( testlogfile ,'a+',encoding="utf-8") as file:
+        print(*args, **kwargs, file=file)
+    
     
 def reportcard(check):
     now = datetime.now()
@@ -179,12 +195,13 @@ def reportcard(check):
     p("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=PASSED")
     
     p("\033[0;32;47m")
-    p( "Tests Passed ",check["pass"])
+    p( "Tests Passed :",check["pass"])
     if(check["pass"]>0):
         p("passed testcases are : \n")
         p(check["p_test"])
-    p("\033[m\033[0;34;47m ")
-    p("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=")
+    else:
+        p("\t"+RED+"NO TESTCASES PASSED!" +CRESET)
+    p("\033[m\033[0;34;47m\n-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=")
     
     # p("==========================================================================")
     #if soft failed / warning in testcases
@@ -226,24 +243,40 @@ def reportcard(check):
     print(middlespace+PURPLE+str(assert_count["FAIL"])+" /"+str(totassert)+" ASSERT(s) FAILED")
     print(middlespace+CYAN+str(assert_count["PASS"])+" /"+str(totassert)+" ASSERT(s) PASSED"+CRESET)
     p("\033[0m")
+    #########################
+    #printing to testcase log
+    #########################
+    p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=")
+    p_to_tslog(":           ######   ***   TEST REPORT   ***   ######")
+    p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-="+current_time+"-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=")
+    p_to_tslog(":Tests Passed ",check["pass"])
+    if(check["pass"]>0):
+        p_to_tslog("passed testcases are : \n")
+        p_to_tslog(check["p_test"])
+    else:
+        p_to_tslog("\t"+RED+"NO TESTCASES PASSED" +CRESET)
+    if(check["warn"]>0):
+        # p("==========================================================================")
+        p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=Warn")
+        p_to_tslog("Tests not run /softfail/warning",check["warn"])
+        if(check["warn"]>0):
+            p_to_tslog("incompleted testcases are : \n")
+            p_to_tslog(check["w_test"])
+        else:
+            p_to_tslog("no warnings")
+        p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=Warn")
+    if(check["fail"]>0):
+        p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=Fail")
+        p_to_tslog("Tests Failed",check["fail"])
+        if(check["fail"]>0):
+            p_to_tslog("failed testcases are : \n")
+            p_to_tslog(check["f_test"])
+        p_to_tslog("-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=-==-=-=-==-=-=-=Fail")
+    p_to_tslog("Total Asserts == ",totassert)
+    p_to_tslog(str(assert_count["FAIL"])+" /"+str(totassert)+" ASSERT(s) FAILED")
+    p_to_tslog(str(assert_count["PASS"])+" /"+str(totassert)+" ASSERT(s) PASSED"+CRESET)
 
 def setup_output_folder_structure():
-    # below changed to config
-    # pathoutput = "Output" 
-    # print("Checking for folders and subfolders")
-    # # Parent Directory path
-    # parent_dir = os.getcwd()
-    # date = str((datetime.date(datetime.now())))
-    # path1 = os.path.join(parent_dir, pathoutput)
-    # path2 = os.path.join(path1, date)
-    # path3 = os.path.join(path2,"screenshots")
-    # path4 = os.path.join(path2,"data")
-    # global outputtime,outputdate # for logger date and time
-    # print(outputtime)
-    # outputdate = date
-    # outputtime = str(datetime.now().strftime("%H-%M-%S"))
-    # # print("path4 :::::::::\n\n\n\n\n",path4)
-    # p("this is iit")
     log = "Checking for folders and subfolders"
     print("Checking for folders and subfolders")
     try:
@@ -260,7 +293,6 @@ def setup_output_folder_structure():
         elif(os.path.isdir(path2) == False):
             os.mkdir(path2)
             os.makedirs(path3,exist_ok = True)
-
             os.mkdir(path4)
             
             print("Output/",date," folder created")
@@ -332,7 +364,7 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
                 return False                         
 # end wait_until_activity    
     
-def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .5,minimal = False):
+def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5,minimal = False):
     '''
     only returns bool if condition is not string check .
     used to check and wait for if a text value of a id/xpath has changed.
@@ -349,6 +381,7 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
     '''
     try:
         d.implicitly_wait(3)
+        print("waiting for ",locatorstring,condition,checker)
         if minimal:
             counter = 0
             if (condition == "==" and checker != ""):
@@ -365,10 +398,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     txt = d.find_element_by_id(locatorstring).text
                 else:
                     if txt == checker and counter<=sec  :
-                        p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
+                        p("\telement TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
                         return True
                     else:
-                        p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
+                        p("\telement TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
                         return False
                         
             elif(condition == "visible" and locatorstring.startswith("//")):
@@ -378,10 +411,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     sleep(iterate)
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
                         return True
             
             elif(condition == "visible"):
@@ -391,10 +424,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     sleep(iterate)
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
+                        p("\telement with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
                         return True
                     
                 # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
@@ -403,14 +436,16 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
             elif(condition == "not visible" and locatorstring.startswith("//")):
                 # p("checking for element visibility")
                 while (len(d.find_elements_by_xpath(locatorstring)) > 0 and counter<sec):
+                    
                     counter = counter + iterate
                     sleep(iterate)
+                    
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ "+locatorstring+ " is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        p("\telement with Xpath "+locatorstring+ " is taking longer than expected. waited for more than:"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ "+locatorstring+ " currently not found. waited for :"+str(counter)+" seconds")
+                        p("\telement with Xpath "+locatorstring+ " currently not found. waited for :"+str(counter)+" seconds")
                         return True
             
             elif(condition == "not visible"):
@@ -420,10 +455,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     sleep(iterate)
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ '"+locatorstring+ "' is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        p("\telement with ID  '"+locatorstring+ "' is taking longer than expected. waited for more than:"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ '"+locatorstring+ "'currently not found. waited for :"+str(counter)+" seconds")            
+                        p("\telement with ID  '"+locatorstring+ "'currently not found. waited for :"+str(counter)+" seconds")            
                         return True
             
             
@@ -456,10 +491,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     txt = d.find_element_by_id(locatorstring).text
                 else:
                     if txt == checker and counter<=sec  :
-                        p("element TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
+                        p("\telement TEXT with ID/expath/ "+locatorstring+GREEN+ " found"+CRESET+". waited for :"+str(counter)+" seconds")
                         return True
                     else:
-                        p("element TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
+                        p("\telement TEXT with ID/expath/ "+locatorstring+ RED+" NOT found "+CRESET+". waited for :"+str(counter)+" seconds")
                         return False
                         
             elif(condition == "visible" and locatorstring.startswith("//")):
@@ -469,10 +504,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     sleep(iterate)
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ "+locatorstring+ " NOT found. waited for :"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ "+locatorstring+ " found. waited for :"+str(counter)+" seconds")
                         return True
             
             elif(condition == "visible"):
@@ -482,22 +517,47 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 15, iterate = .
                     sleep(iterate)
                 else:
                     if counter>=sec :
-                        p("element with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
+                        p("\telement with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
                         return False
                     else:
-                        p("element with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
+                        p("\telement with ID/xpath/ '"+locatorstring+ "' found. waited for :"+str(counter)+" seconds")            
                         return True
                     
                 # p("#TO_DO : logic yet to be written.just sleep for 3 seconds now to ensure running")
                 # p("if you are a developer please create one now")
+            elif(condition == "not visible" and locatorstring.startswith("//")):
+                # p("checking for element visibility")
+                while (len(d.find_elements_by_xpath(locatorstring)) > 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("\telement with ID/xpath/ "+locatorstring+ " is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("\telement with ID/xpath/ "+locatorstring+ " currently not found. waited for :"+str(counter)+" seconds")
+                        return True
+            
+            elif(condition == "not visible"):
+                # p("checking for element visibility by id")
+                while (len(d.find_elements_by_id(locatorstring)) > 0 and counter<sec):
+                    counter = counter + iterate
+                    sleep(iterate)
+                else:
+                    if counter>=sec :
+                        p("\telement with ID/xpath/ '"+locatorstring+ "' is taking longer than expected. waited for more than:"+str(counter)+" seconds")
+                        return False
+                    else:
+                        p("\telement with ID/xpath/ '"+locatorstring+ "'currently not found. waited for :"+str(counter)+" seconds")            
+                        return True
             else:
                 if (condition == "==" and checker == ""):
-                    p("checker string missing, sleeping 3 for the sake of test")
+                    p("\tchecker string missing, sleeping 3 for the sake of test")
                     sleep(3)
                     return False
                 else:
-                    p("TO_DO: wait_until != logic to be written ,please do not use it now")
-                    p("if you are a developer please create one now")
+                    p("\tconditions not met: logic to be written ,please do not use it now")
+                    p("\tif you are a developer please create one now")
                     return False
     finally:
         d.implicitly_wait(10)
@@ -613,10 +673,13 @@ def go_and_check_dashboardbalance(d):
             #ensuring top of dashboard
             # d.swipe(34, 406, 40, 700, duration=600)
         welcomeinhometxtid = "com.bfccirrus.bfcpayments.mobile:id/txtWelcome"
-        wait_until(d,welcomeinhometxtid,"visible")
-        walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
-        print("current balance is :",walletbal)
-        return float(walletbal)
+        if wait_until(d,welcomeinhometxtid,"visible"):
+            walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
+            print("current balance is :",walletbal)
+            return float(walletbal)
+        else:
+            print("some error occured while fetching balance, welcome text in dashboard not found")
+            save_screenshot(d,'dashboardbalance_check')
     except Exception as e:
         print(e)# e
         
@@ -891,7 +954,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
     element = object - pass the value of current screen
     condition ["==" | "!=" | 'contains','not contains' #only string]
     checker = expected value
-    \ncheck visiblility assert by passing element object 
+    \ncheck visiblility assert by passing element (not locator string) or condition = 'visible'
     TO_DO : pass multiple values in list and iterate for contains and not contains
     '''
     # RED="\033[0;31m"  # <-- [0 means not bold
@@ -907,7 +970,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
     # WHITEONRED = '\x1b[1;37;41m'
     
     elemstr = "*** Function Object ***" if element is None else str(element) # to avoid conflict in prints
-    print("element string in checkassert",elemstr)
+    print("\telement string in checkassert",elemstr)
 # == condition
     if condition == "==":
         #format first:::
@@ -933,7 +996,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
                 elemstr,checker = (element,checker) if type(checker) is bool else (checker,element)
                 # if type(elemstr)is not None and len(elemstr) > 60:
                 #     p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" '==' "+assertname+" FAILED"+CRESET)
-                #     p("element : "+elemstr+" != " +str(checker))
+                #     p("\telement : "+elemstr+" != " +str(checker))
                 #     assert_count["FAIL"] += 1                 
                 #     return False
                 # else:
@@ -1001,12 +1064,12 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             else:    
                 if len(elemstr) > 60:
                     p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" 'contains' {"+checker+"} "+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" != " +checker)
+                    p("\telement : "+elemstr+" != " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 else:
                     p(RED+" ❌ "+CRESET +" "+PURPLE+elemstr+ "'contains' {"+checker+"}"+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" != " +checker)
+                    p("\telement : "+elemstr+" != " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 
@@ -1031,30 +1094,32 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             else:    
                 if len(elemstr) > 60:
                     p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" 'contains' {"+checker+"} "+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" contains " +checker)
+                    p("\telement : "+elemstr+" contains " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 else:
                     p(RED+" ❌ "+CRESET +" "+PURPLE+elemstr+ "'contains' {"+checker+"}"+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" contains " +checker)
+                    p("\telement : "+elemstr+" contains " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 
         
         else:
-            p(RED+" ❌ either or both passed elements are not string "+CRESET)
-            p("type of element : "+type(elemstr)+" and type of checker : " +type(checker))
+            p(RED+"\t ❌ either or both passed elements are not string "+CRESET)
+            p("\ttype of element : "+type(elemstr)+" and type of checker : " +type(checker))
             assert_count["FAIL"] += 1                 
             return False
 #visibility check without check
     elif((condition == '' or condition == 'visible' )and checker == '')  :
+        #checker is checked here to ensure no mixed up of assert name and checker for visible only format
         try:
-            print("checking element visibility") 
-            print(element.get_attribute('displayed') , " for element visibility")
+            print("\tchecking element visibility") 
+            print("\t",element.get_attribute('displayed') , " for element visibility")
+            # element.get_attribute('text')
             # element.get_attribute('visibility') == 'visible'  #visibility	visible
             if (element.get_attribute('displayed') or element.is_displayed()) :
-                print("element text is ",element.get_attribute('text'))
-                element = element.get_attribute('text') if element.get_attribute('text') is not None else ...
+                print("\telement text is ",element.get_attribute('text'))
+                elemstr = element.get_attribute('text') if element.get_attribute('text') is not (None or '') else ...
                 if len(elemstr) > 60:
                     p(GREEN+" ✓ "+CRESET + " "+CYAN+elemstr[0:20]+"..."+elemstr[-20:]+" ' is VISIBLE ' {"+checker+"} : "+assertname+" passed"+CRESET)
                     assert_count["PASS"] += 1 
@@ -1066,12 +1131,12 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             else:
                 if len(elemstr) > 60:
                     p(RED+" ❌ "+CRESET + " "+PURPLE+elemstr[0:20]+"..."+elemstr[-20:]+" ' Is NOT VISIBLE ' {"+checker+"} "+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" contains " +checker)
+                    p("\telement : "+elemstr+" contains " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 else:
                     p(RED+" ❌ "+CRESET +" "+PURPLE+elemstr+ "' Is NOT VISIBLE ' {"+checker+"}"+assertname+" FAILED"+CRESET)
-                    p("element : "+elemstr+" contains " +checker)
+                    p("\telement : "+elemstr+" contains " +checker)
                     assert_count["FAIL"] += 1                 
                     return False
                 
@@ -1085,8 +1150,9 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
             return False
 # catch any unfound condition
     else:
-        p("checkassert conditions not met")
-        p('Element:',element,'\ncondition :',condition,'\nchecker :',checker,'\nassertname:',assertname)
+        
+        p("❌ checkassert conditions not met")
+        p('\tElement:',element,'\n\tcondition :',condition,'\n\tchecker :',checker,'\n\tassertname:',assertname)
                   
 def callerfunction(d):
     return inspect.stack()[1].function
@@ -1302,7 +1368,7 @@ def check_snackbar(d,sec =5,iter =0.5,minimal = False):
             #loading
             n =int(checker)
             print("checking for snackbar "+"⢀"*n,end="\r")
-            # p("element not found , scrolling "+"⢀"*x ,  end="\r")
+            # p("\telement not found , scrolling "+"⢀"*x ,  end="\r")
             
             checker = checker +iter #iterating with {iter} sleep
             # sleep(iter)
@@ -1564,7 +1630,7 @@ def dftohtml(df):
 
 
 def check_progressbar(d): #: , sec = 12 , iter = 1,maximum_wait_time =60):
-    '''returns bool if progress bar found
+    '''returns bool if progress bar found,includes snackbar check
     TRUE IF NOT FOUND ELSE FALSE
         waits till progress bar in visible or until time reach    
     '''
@@ -1695,8 +1761,8 @@ def check_snackbarv2(d,sec =5,iter =0.5,minimal = False):
             raise customclasses.failed(callerfunction(d),snackbartext)
     except customclasses.failed as e:
         if not minimal:
-            p("alert message is : \n", e.message)
-            print("in page : ",e.test_name)
+            p("alert message is :"+YELLOW+" \n\t", e.message)
+            print(CRESET+"in page : ",e.test_name)
         return True ,e.message
 
 def format_csv(csvpath):

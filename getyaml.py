@@ -45,6 +45,8 @@ def getyaml(yamlpath):
     yaml = YAML(typ='safe')
     data = yaml.load(Path(yamlpath))
     return data
+
+
 def serialise_data(yamlpath):
     (r'C:\Users\Administrator\Desktop\pyppium\sitemap.yaml') if yamlpath is None else yamlpath
     print("getting the yaml data from ",yamlpath)
@@ -55,42 +57,21 @@ def serialise_data(yamlpath):
     serialisertarget = []
     serialiseractivity = []
     for pages in yamldata:
-        # print ("pages :::::::::",pages)
-        # print ("type of pages :::::::::",type(pages))
-        # print("\tyamldata[pages]",yamldata[pages])
+
         for page, page_actions in yamldata[pages].items():
             if page == 'events':
-            
-                # print ("\t\tpage :::::::::",page)
-                # print ("\t\tyamldata[pages][page] :::::::::",yamldata[pages][page])
-                # print ("\t\tpage_actions :::::::::",page_actions)
-                # print("\ttype of pageaction:::::::::::",type(page_actions))
-                # for x in page_actions:
-                # print("\txxxxxxx",x)
-                # print(">>>>>>>>>",type(page_actions))
                 if isinstance(page_actions,(list)):
-                    # print("\n\n\nthis is list",page_actions)
-                    # print("typeof page_actions[0]0",type(page_actions[0]))
                     for eachtuple in page_actions:
-                        # print("this is eachtuple",eachtuple)
-                        # print("eachtuple[0]:::::::::",eachtuple[0])
                         serialiser.append(eachtuple[0])
                         serialisertarget.append(eachtuple[1])
                         serialiseractivity.append(yamldata[pages]['activity'])
                 elif isinstance(page_actions,(dict)):
-                    # print("\n\n\nthis is dict",page_actions)
                     for k,v in page_actions.items():
-                        # print("kkkkkkkkkkkkkkkkkkkkkk",k)
-                        # print("vvvvvvvvvvvvvvvvvvvvvv",v)
                         serialiser.append(k)
                         serialisertarget.append(v)
                         serialiseractivity.append(yamldata[pages]['activity'])
-                        
-                        # print("page_actions[v]",page_actions[v])
                 else:
                     print("\n\n?????????????????????\n\n this is something else\n")
-    # print(serialiser)
-    # print(serialisertarget)
     return  serialiser,serialisertarget,serialiseractivity
 
 

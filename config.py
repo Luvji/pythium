@@ -20,6 +20,10 @@ parent_dir = os.getcwd()
     #                                               }
     # 
     #                                                   }
+# commom supported attributes: [checkable, checked, {class,className}, clickable, {content-desc,contentDescription}, enabled, 
+#               focusable, focused, {long-clickable,longClickable}, package, password, 
+#               {resource-id,resourceId}, scrollable, selection-start, selection-end, 
+#               selected, {text,name}, bounds, displayed, contentSize]
 
 #Laura
 # loggedcpr = '970061300'
@@ -38,13 +42,35 @@ parent_dir = os.getcwd()
 # loggedmobile = '33333349'
 # loggeddob = '2009-03-20'
 # loggedname = 'Unknown'
+# David	Fleming	Phillips	male	961528153	07/18/2036	34454045	ryan34@example.net	Laurenmouth	1985-07-25	Tanzania	fPSh38615	11/01/2022
 
 #unknownThomas
-loggedcpr = '910425100'
-loggedmobile = '31111300'
-loggeddob = ['2009-03-10','2010-09-19','2009-03-20']
-loggedname = 'Thomas'
-loggedpassport = 'hiqk41922'
+# loggedcpr = '961528153'
+# loggedmobile = '34454045'
+# loggeddob = ['2009-03-10','1985-07-25','2009-03-20']
+# loggedname = 'David'
+# loggedpassport = 'fPSh38615'
+# loggedotp = '111111'
+# loggeduserpin = '123321'
+# loggedemail = 'test@example.net'
+
+loggedcpr = '921851389'
+loggedmobile = '39932689'
+loggeddob = ['1988-09-27']
+loggedname = 'Courtneyer'
+loggedpassport = 'fPSh38615'
+loggedotp = '111111'
+loggeduserpin = '123321'
+loggedemail = 'test@example.net'
+
+# Courtney	Bowen	Santos	MALE	921851388	10/10/2027	39932689	veronicajohnson@example.org	Lake Matthew	1988-09-27	Moldova	Mxah84125	12/16/2035	home	jESG22	j11	Xz041	9627	english	CPR	Product designer
+
+#unknownThomas
+# loggedcpr = '921851388'
+# loggedmobile = '39932689'
+# loggeddob = ['1988-09-27','2010-09-19','2009-03-20']
+# loggedname = 'Courtney'
+# loggedpassport = 'Mxah84125'
 
 #davis #avenues enabled
 # loggedcpr = '871275287'
@@ -61,7 +87,6 @@ loggedpassport = 'hiqk41922'
 # loggedname = 'Davis'
 
 
-loggeduserpin = '123321'
 if isinstance(loggeddob, str):
     dob = loggeddob.rsplit("-") #['2009', '03', '20']
     bday =  dob[2]    #format dd
@@ -82,7 +107,6 @@ minimal = False
 
 addmoneyamount = 1
 addmoneyupperlimit = 3999
-loggedotp = '111111'
 cardnumber = "460041123"+str( randint(1000000,9999999)) # 460041<10digits>
 cardholdername = "redlohdrac eman"
 nofailtestcase = ["register_with_cpr",'feed_signin'] # if this fails close this test ,without running anything else
@@ -102,9 +126,9 @@ feederexceloutput = ''
 feederhtmloutput = ''
 check = {"pass" : 0 , "fail" : 0 ,"warn": 0,"w_test":[], "p_test" : [] , "f_test" : [] ,"flow" :{}}
 
-#paths
 #parent dir /app/*.apk
-apkpath = os.path.join(parent_dir, 'app','app-uat.apk')
+apkpath = os.path.join(parent_dir, 'app','app-uat (7).apk')
+# debugapkpath = os.path.join(parent_dir, 'app','app-debug.apk')C:\Users\Administrator\Desktop\pyppium_new_app\app\app-uat (7).apk
 #log file path C:\Users\Administrator\Desktop\pyppium\Output\2022-09-01\log\screenshots
 # logpath = "" #changed name to to session log file
 # yaml path 
@@ -132,9 +156,10 @@ outputdate = date
 outputtime = str(datetime.now().strftime("%H-%M-%S"))
 # path to create excel output
 outputexcelpath = path2
-expectedloginflow = ['changemobile','shufti','passport']
+# ['changemobile','shufti','passport','firsttime']
+expectedloginflow = ['changemobile','shufti','passport','firsttime']
 sessionlogfile =os.path.join(path2,"log", outputtime+'_log.txt')    
-
+testlogfile = os.path.join(path2,"log", outputtime+'Teststatus_log.txt')
 
 ########## activities #############
 

@@ -7,13 +7,16 @@ general:
   entrypoint: ""
   events:
     register_with_cpr: dashboard
-    click_add_money: wallet
-    add_money_to_wallet_from_card_by_BHD_20_button: wallet
+    # click_add_money: wallet
+    # add_money_to_wallet_from_card_by_BHD_20_button: wallet
+    # click_add_money: wallet
+    # add_money_to_wallet_from_card_by_BHD_40_button: wallet
+    # click_add_money: wallet
+    # add_money_to_wallet_from_card_by_BHD_50_button: wallet
+    # click_add_money: wallet
+    # add_money_to_wallet_from_input: wallet
+    
     # click_cards: cards
-
-
-
-
 
 
     # signout: dashboard

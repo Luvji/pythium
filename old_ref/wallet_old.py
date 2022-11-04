@@ -751,8 +751,7 @@ def add_money_to_wallet_from_card_by_BHD_40_button(self):
     finally:
         testcasereport(test_name,status,message)
         
-        
-        
+#input amt     
 def add_money_to_wallet_from_input(self,addamount = 100,**kwargs):
     '''
     adds money to wallet by specific flow:

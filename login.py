@@ -284,6 +284,8 @@ def register_with_cpr(self):
                 status = "FAIL"
                 # message = "not reached the dashboard , call_check dashboard here"
         elif len(d.find_elements(By.ID,"txtHeading")) > 0 and not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0: #d.find_element_by_id("txtWelcomeDialog").is_displayed():
+            print(len(d.find_elements(By.ID,"txtHeading")) > 0)
+            print(not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
             print("getting on the signupflow")
             signupwelcometext = d.find_element(By.ID,"txtHeading").text
             print("checking if text ",signupwelcometext," is actually intended welcome text")
@@ -298,16 +300,18 @@ def register_with_cpr(self):
             
             entercpr = d.find_element(By.ID,"edtCPR")
             entercpr.send_keys(loggedcpr)
-            print("entered cpr , ",loggedcpr)
+            print("entered cpr , ",loggedcpr,' clicking checkbox')
             
             d.find_element(By.ID,"checkBoxTermsAndConditions").click()
+            print("checkbox clicked, clicking submit")
             
             d.find_element(By.ID,"btnSubmit").click()
+            print("submit clicked")
             # check_snackbarv2(d)
             snackbarfound,snackbartext =  check_snackbarv2(d)
             if snackbarfound:
                 print("\n",YELLOW,snackbartext,CRESET,"\n")
-                print(RED+"\n\tUNLOCK the user from cxportal to continue"+CRESET)
+                print(RED+"\n\ttryUNLOCK the user from cxportal to continue or check connection"+CRESET)
                 
                 raise failed(test_name,"Alert :"+snackbartext)
             print("proceed button clicked , reaching onto mobile number page:")
@@ -319,9 +323,8 @@ def register_with_cpr(self):
             # loggedmobile = "33333333"
             formattednumber = loggedmobile[0]+"****"+loggedmobile[5:8] #making it into format = 6****011
             
-            
             print("entering mobile number , ",loggedmobile)
-            print(YELLOW+"\n\n\n changing mobilenumber to null for test , change it back to variable after development"+CRESET+"\n\n\n")
+            # print(YELLOW+"\n\n\n changing mobilenumber to null for test , change it back to variable after development"+CRESET+"\n\n\n")
             # id	@id/viewEditBg
             if loggedmobile == "33333333":
                 d.find_element(By.ID,"editMobileNumber").send_keys('31336333')
@@ -354,13 +357,30 @@ def register_with_cpr(self):
                     print("moile number change flow not intended,selecting the already registered number")  
             else:
                 print("no other mobile number for is registered with this account")
-                if not checkassert(d,'changemobile' in expectedloginflow , "expected flow check"):
+                if not checkassert(d,'changemobile' in expectedloginflow ,'==',True, "change number flow check"):
                     print("expected flow cannot be executed , proceeding with normal flow.")
+                else:
+                    print("change number flow is not expected")
+                    
             d.find_element_by_xpath("//android.widget.Button[@text = 'Proceed']").click()
             check_progressbar(d)
             enterotplabel = d.find_element(By.ID,"txtLabelAlmostHere").text
-            txt ="Enter the 6 digit OTP sent to +973 "+formattednumber
-            checkassert(d,enterotplabel ,"==",txt,"enter OTP label displayed?")
+            # txt ="Enter the 6 digit OTP sent to  +973 "+formattednumber
+            if '****' in enterotplabel:
+                #adding a space for the sake of the test case. between 'to +9'
+                txt ="Enter the 6 digit OTP sent to ‎ +973 "+formattednumber
+                print("this number has registered once")
+            else:
+                txt ="Enter the 6 digit OTP sent to ‎ +973 "+loggedmobile
+            if checkassert(d,enterotplabel ,"==",txt,"enter OTP label displayed?"):
+                print("\tmobile number is already registered")
+            else:
+                print("\tseems like new number flow should go to shufti,to verify mobile")
+                if 'changemobile' in expectedloginflow:
+                    print("\tflow expects a mobile change")
+                else:
+                    print("\tflow doesnot expect a mobile change , if it is not intended this is a fail")
+                
             # id	@id/edtOtp
             d.find_element(By.ID,"edtOtp").send_keys(loggedotp)
             print("OTP entered ")
@@ -373,27 +393,47 @@ def register_with_cpr(self):
                 save_screenshot(d,test_name)
                 raise failed(test_name,"Alert :"+snackbartext)
                 
-            print("proceed button clicked , reaching onto mobile number page:")
+            print("proceed button clicked , reaching onto dob page:")
             # id	@id/txtVerifyDobLabel
-            lblverifydate = d.find_element(By.ID,"txtVerifyDobLabel").text
-            
-            checkassert(d,lblverifydate ,"==","Verify date of birth","verify date page reached?")
+# if user is onboarding for first time , there will be no date check,it will go to pin and then shufti
+            lblverifydates = d.find_elements(By.ID,"txtVerifyDobLabel")
+            if len(lblverifydates)>0:
+                if 'firsttime' in expectedloginflow:
+                    print(YELLOW,"\tDOB verification is not intended for first time onboarding users, this is an error if not intended",CRESET)
+                else:
+                    checkassert(d,'firsttime' in expectedloginflow ,"==",True,"expected user flow check - is the user onboarding for first time?")
+                print("verify date screen check")    
+                checkassert(d,lblverifydates[0].text ,"==","Verify date of birth","verify date page reached?")
 
-# adding date as function
-            if isinstance(loggeddob, list):
-                testflow = testflow + ">multiple DOB"
-                for selecteddate in loggeddob:
-                    checkdate = enterdate(self,selecteddate)
-                    if checkdate == True:
-                        break
+    # adding date as function
+                if isinstance(loggeddob, list):
+                    testflow = testflow + ">multiple DOB"
+                    for selecteddate in loggeddob:
+                        checkdate = enterdate(self,selecteddate)
+                        if checkdate == True:
+                            break
+                else:
+                    testflow = testflow+ ">single DOB"
+                    enterdate(self,loggeddob)
+                print("checking if dob verification ")
+    #wait time reduced inside enter dob section returning it to normal now
+                self.driver.implicitly_wait(10)
+                            
+                check_and_hide_keyboard(d)
             else:
-                testflow = testflow+ ">single DOB"
-                enterdate(self,loggeddob)
-            print("checking if dob verification ")
-#wait time reduced inside enter dob section returning it to normal now
-            self.driver.implicitly_wait(10)
+                if len(d.find_elements(By.ID,"txtLabelSetMpin"))>0: 
+                    if 'firsttime' in expectedloginflow:
+                        print(BLUE+"\tSeems user is onboarding for first time.and the flow is expected"+CRESET)
+                    else:
+                        print(YELLOW,"Seems user is logged in for first time but this flow is not expected . this is fail if NOT INTENDED ")
+                    print("continuing onto flow : Verify pin -")
+                else:
+                    #this means it does not have set pin screen or dob verify screen. no other screen is expected here.
+                    print("this flow is not recognised, this means it does not have set pin screen or dob verify screen. no other screen is expected here")
+                    raise failed(test_name,"the flow is not recognised , if this is on normal flow check crash scenario")
+                    #
                         
-            check_and_hide_keyboard(d)
+                    
             # id	@id/imgEmail txtLabelSetMpin
             txtLabelSetMpin = d.find_element(By.ID,"txtLabelSetMpin").text
             checkassert(d,txtLabelSetMpin ,"==","Set a PIN","Pin set page reached?")
@@ -414,7 +454,35 @@ def register_with_cpr(self):
                 print("screen proceeded to shufti")
                 if 'shufti' in expectedloginflow:
                     testflow = testflow + "initiated"
-                    shufti_initiation(self)
+                    print("shufti is expected as login flow")
+                    tr,status,message =shufti_initiation(self)
+#bdo check happening here
+                    print('checking for bdo screen visibility') #id	@id/txtLabelAlmostHere
+                    bdocheck = wait_until(d,'txtLabelAlmostHere',visible,sec = 25)
+                    if bdocheck:
+                        # print(loggedemail)
+                        print("bdo screen visible , user is confirmed to be new") #id	@id/etEmailId
+                        global loggedemail
+                        loggedemail = 'test@example.net' if loggedemail == None or '' else loggedemail
+                        # d.find_element(By.ID,'etEmailId').send_keys(loggedemail)
+                        print("selecting default for now, select from list given for test coverage increase")
+                        print("clicking on tnc check box on BDO screen")
+                        d.find_element(By.ID,"checkBoxTermsAndConditions").click()
+                        sleep(1)
+                        #id	@id/btnDone
+                        donebutton  = d.find_element(By.ID,'btnDone') 
+                        donebuttonstatus = donebutton.get_attribute('enabled')
+                        #if donebuttonstatus == false ,means button is enabled and clickable
+                        if checkassert(d,donebuttonstatus,'==','true',"done button enabled for bdo screen check"):
+                            donebutton.click()
+                            check_progressbar(d)
+                            print("BDO process is complete ,checking for dashboard now.")
+                        else:
+                            print("Done button is disabled, check all fields are filled and try again ")
+                            tr ='warn'
+                            status = "FAILED"
+                            message = 'Shufti verified successfully but BDO survey screen could not be completed'
+                            save_screenshot(d,test_name)
                 elif force :
                     print(RED+ "\n\t\tthis went to shufti , which was not intended.but with force enabled test continues with shufti."+CRESET)
                     testflow = testflow + "forcefully initiated"
@@ -423,7 +491,7 @@ def register_with_cpr(self):
                     print("shufti completed ,tr,status,message are  " ,tr,status,message)
                 else:
                     testflow = testflow + "unexpected"
-                    print("this is not expected to be in shufti")
+                    print("this is not expected to be in shufti,and shufti flow is not initiatiating. test might fail now")
             else:
                 
                 if 'shufti' in expectedloginflow:
@@ -455,15 +523,19 @@ def register_with_cpr(self):
         print("checking current activity is dashboard ,if not the flow might have changed to shufti")
         if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
             if tr:
-                message = message + " , But the activity dashboard not reached"
+                message = message + " , But also the activity dashboard not reached"
                 tr = "warn"
-                checkshufti = d.find_element(By.ID,'txtVerifyDobLabel') and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
+                checkshufti = len(d.find_elements(By.ID,'txtVerifyDobLabel') )>0 and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
+                # checkshufti = len(d.find_elements(By.ID,'txtVerifyDobLabel'))>0 and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
                 if checkshufti:
                     print("shufti procedure needed to be proccessed\n")
                     print("\n\n\n check if this call to shufti is needed , it may not be needed after all")
                     if force:
                         
                         tr,status,message = shufti_initiation(self,minimal = True)
+                        print('shufti test result is ',tr)
+                        print('shufti test status is ',status)
+                        print('shufti test message is ',message)
                     # if tr:
                     else:
                         print("shufti procedure will not be initiated")
@@ -533,16 +605,17 @@ def signinwithpin(self,minimal = False,logged = None):
             print("current activity in simple login ",d.current_activity)
             c1 = driver.find_element(By.ID,"txtWelcomeBack")
             # print("\nwelcome back text :::::::::::::",c1.text)
-            if (checkassert(d,c1.text ,"contains",loggedname," intended user check")):
+            if (checkassert(d,c1.text ,"contains",loggedname," intended logged in user at pin login check")):
                 c1.click()
                 com_bfccirrus_bfcpayments_mobile_colon_id_slash_c_1 = driver.find_element(By.ID,
                                                                                         "circleField")
                 com_bfccirrus_bfcpayments_mobile_colon_id_slash_c_1.send_keys(str(loggeduserpin))
+                wait_until_activity(d,dashboardactivity,'visible')
                 check_snackbarv2(d)
                 check_progressbar(d)
                 # d.find_element(By.ID,"btnSubmit").click()
                 # id	@id/txtPersonName
-                print("checking for dashboard activity visibility",d.current_activity == dashboardactivity)
+                print("checking for current dashboard activity visibility is ",d.current_activity," : ",d.current_activity == dashboardactivity)
                 loggedpersonname = d.find_element(By.ID,"txtPersonName").text
                 tr = checkassert(d,loggedpersonname ,"==",loggedname,"checking logged name in dashboard is :"+loggedname+"?")
                 if tr == True:
@@ -689,194 +762,309 @@ def shufti_initiation(self,minimal = True):
     try:
         if d.find_element(By.ID,'txtVerifyDobLabel') and checkassert(d,driver.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtVerifyDobLabel").text,"==",'Consent for verification'," shufti verification reached"):
             print("shufti verification initiated")
-            print("confirm consent window")
+            print("confirm consent window check")
             # 2. Click 'Yes, Proceed'
+            scroll_down_to_view(d,"com.bfccirrus.bfcpayments.mobile:id/btnProceed")
+            # id	@id/checkBoxTermsAndConditions
+            checkBoxTermsAndConditions = driver.find_element(By.ID,
+                                            "com.bfccirrus.bfcpayments.mobile:id/checkBoxTermsAndConditions")
+            checkBoxTermsAndConditions.click()
+            print("consent window found")
+            
             yes_proceed = driver.find_element(By.ID,
                                             "com.bfccirrus.bfcpayments.mobile:id/btnProceed")
             yes_proceed.click()
+            print("consent sanctioned")
             # 3. check 'shuftipro-verification-process' to be not seen - shufti loader
             # shuftipro_verification_process = driver.find_element(By.XPATH,
             #                                                     "//android.webkit.WebView[@text = 'shuftipro-verification-process']")
-            # shuftipro_verification_process.click()
+            # shuftipro_verification_process - is the shufti loading
             wait_until(d,"//android.webkit.WebView[@text = 'shuftipro-verification-process']",'not visible')
+            
+            faceverification = driver.find_elements(By.XPATH,
+                                            "//android.widget.TextView[@text = 'Face Verification']")
+            if len(faceverification)>0:
+                print("face verification instruction page reached,clicking on continue ")
+                driver.find_element(By.XPATH,
+                                            "//android.widget.Button[@text = 'Continue']").click()
+            else:
+                print("face verifications instruction screen not found,trying to continue the flow.")
 
             # 4. Click 'How would you like to submit your Nat...'
-            wait_until(d,"//android.view.View[@text = 'How would you like to submit your National ID ?']",'visible')
-            how_would_you_like_to_submit_your_id = driver.find_element(By.XPATH,
+            nationalidfound = wait_until(d,"//android.view.View[@text = 'How would you like to submit your National ID ?']",'visible',sec=3)
+            submitprooffound = wait_until(d,"//android.widget.TextView[@text = 'How will you submit the identity proof ?']",'visible')
+            if nationalidfound:
+                how_would_you_like_to_submit_your_id = driver.find_element(By.XPATH,
                                                                         "//android.view.View[@text = 'How would you like to submit your National ID ?']")
-            
-            if checkassert(d,how_would_you_like_to_submit_your_id.text,'==','How would you like to submit your National ID ?'):
+                print("flow of web? view")
+                if checkassert(d,how_would_you_like_to_submit_your_id.text,'==','How would you like to submit your National ID ?'):
 
-                # 5. Click 'Upload file'
-                upload_file = driver.find_element(By.XPATH,
-                                                "//android.widget.Button[@text = 'Upload file ']")
-                upload_file.click()
+                    # 5. Click 'Upload file'
+                    upload_file = driver.find_element(By.XPATH,
+                                                    "//android.widget.Button[@text = 'Upload file ']")
+                    upload_file.click()
 
-                # 6. Click 'Upload a photo of the frontside of yo...'
-                upload_a_photo_of_the_frontside_of_yo_ = driver.find_element(By.XPATH,
-                                                                            "//android.view.View[@text = 'Upload a photo of the frontside of your Bahraini National ID']")
-                upload_a_photo_of_the_frontside_of_yo_.click()
-                print("image uploading start")
-                # 7. Click 'Upload'
-                upload = driver.find_element(By.XPATH,
-                                            "//android.widget.Button[@text = 'Upload']")
-                upload.click()
-                # upload.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
+                    # 6. Click 'Upload a photo of the frontside of yo...'
+                    upload_a_photo_of_the_frontside_of_yo_ = driver.find_element(By.XPATH,
+                                                                                "//android.view.View[@text = 'Upload a photo of the frontside of your Bahraini National ID']")
+                    upload_a_photo_of_the_frontside_of_yo_.click()
+                    print("image uploading start")
+                    # 7. Click 'Upload'
+                    upload = driver.find_element(By.XPATH,
+                                                "//android.widget.Button[@text = 'Upload']")
+                    upload.click()
+                    # upload.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
 
-                # # 8. Click 'ANDROID.WIDGET.RELATIVELAYOUT' choose cam or gallery
-                # android_widget_relativelayout = driver.find_element(By.XPATH,
-                #                                                     "//android.widget.RelativeLayout")
-                # # android_widget_relativelayout.click()
-                # android_widget_relativelayout.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
-                image_choose = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Image Chooser']")
-                # 9. Click 'android:id/icon' select files
-                android_colon_id_slash_icon = driver.find_element(By.XPATH,
-                                                                "//android.widget.TextView[@text = 'Files']")
-                                                                # "//android.widget.LinearLayout[2]//android.widget.ImageView") 
+                    # # 8. Click 'ANDROID.WIDGET.RELATIVELAYOUT' choose cam or gallery
+                    # android_widget_relativelayout = driver.find_element(By.XPATH,
+                    #                                                     "//android.widget.RelativeLayout")
+                    # # android_widget_relativelayout.click()
+                    # android_widget_relativelayout.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
+                    image_choose = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Image Chooser']")
+                    # 9. Click 'android:id/icon' select files
+                    android_colon_id_slash_icon = driver.find_element(By.XPATH,
+                                                                    "//android.widget.TextView[@text = 'Files']")
+                                                                    # "//android.widget.LinearLayout[2]//android.widget.ImageView") 
+                    
+                    # android_colon_id_slash_icon.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
+                    android_colon_id_slash_icon.click()
+                    print("\n\n\n self.driver.context is current context",self.driver.current_context)
+
+                    # 10. Click 'com.android.documentsui:id/icon_thumb'
+                    com_android_documentsui_colon_id_slash_icon_thumb = driver.find_element(By.XPATH,
+                                                                                            "//android.widget.TextView[@text = 'ID_front.jpeg']")
+                    com_android_documentsui_colon_id_slash_icon_thumb.click()
+
+                    # # 11. Click 'More options'
+                    # more_options = driver.find_element(By.XPATH,
+                    #                                 "//android.widget.ImageButton[@content-desc = 'More options']")
+                    # more_options.click()
+
+                    # 12. Click 'Continue'
+                    # wait_until(d,"//android.view.View[@text = 'Can you see the entire document clearly in the photo?'])",'visible')
+                    print("clicking on continue to confirm")
+                    _continue = driver.find_element(By.XPATH,
+                                                    "//android.widget.Button[@text = 'Continue']")
+                    _continue.click()
+
+                    # 13. Click 'Upload1'
+                    print("uploading backside of the national id")
+                    
+                    
+                    wait_until(d,"//android.view.View[@text = 'Upload a photo of the backside of your Bahraini National ID']",'visible')
+                    
+                    
+                    upload1 = driver.find_element(By.XPATH,
+                                                "//android.widget.Button[@text = 'Upload']")
+                    upload1.click()
+                    print("\n\n\n self.driver.context is current context",self.driver.current_context)
+
+                    # 14. Click 'android:id/icon' image chooser found selecting files
+                    android_colon_id_slash_icon = driver.find_element(By.XPATH,
+                                                                    "//android.widget.TextView[@text = 'Files']")
+                    android_colon_id_slash_icon.click()
+                    
+
+
+                    # 15. Click 'com.android.documentsui:id/icon_thumb1'
+                    # com_android_documentsui_colon_id_slash_icon_thumb1 = driver.find_element(By.XPATH,
+                                                                                            # "//android.widget.LinearLayout[2]//android.widget.ImageView")
+                    com_android_documentsui_colon_id_slash_icon_thumb1 = driver.find_element(By.XPATH,
+                                                                                            "//android.widget.TextView[@text = 'ID_back.jpeg']")
+                    
+                    print("\n\n\n self.driver.context is current context after file click",self.driver.current_context)
+                    
+                    
+                    com_android_documentsui_colon_id_slash_icon_thumb1.click()
+
+                    # # 16. Click 'More options'
+                    # more_options = driver.find_element(By.XPATH,
+                    #                                 "//android.widget.ImageButton[@content-desc = 'More options']")
+                    # more_options.click()
+
+                    # 17. Click 'Can you see the entire document clear...'
+                    can_you_see_the_entire_document_clear_ = driver.find_element(By.XPATH,
+                                                                                "//android.view.View[@text = 'Can you see the entire document clearly in the photo?']")
+                    can_you_see_the_entire_document_clear_.click()
+
+                    # 18. Click 'Continue'
+                    _continue = driver.find_element(By.XPATH,
+                                                    "//android.widget.Button[@text = 'Continue']")
+                    _continue.click()
+                    wait_until(d,"//android.view.View[@text = 'Uploading document ...']",'not visible')
+                    
+                    print("uplaoding face")
+                    wait_until(d,"//android.view.View[@text = 'How would you like to verify your face?']",'visible')
+
+                    # 19. Click 'Upload file'
+                    upload_file = driver.find_element(By.XPATH,
+                                                    "//android.widget.Button[@text = 'Upload file ']")
+                    upload_file.click()
+                    # driver.switch_to.context('WEBVIEW')
+
+                    # 20. Click 'Upload'      self.driver.find_element_by_partial_link_text("YOUR CHOICES")
+                    upload = driver.find_element(By.XPATH,
+                                                "//android.widget.Button[@text = 'Upload']")
+                    upload.click()
+
+                    # 21. Click 'android:id/icon'
+                    android_colon_id_slash_icon = driver.find_element(By.XPATH,
+                                                                    "//android.widget.TextView[@text = 'Files']")
+                                                                    
+                                                                    # "//android.widget.LinearLayout[2]//android.widget.ImageView")
+                    android_colon_id_slash_icon.click()
+
+                    # 22. Click 'com.android.documentsui:id/icon_thumb2'
+                    com_android_documentsui_colon_id_slash_icon_thumb2 = driver.find_element(By.XPATH,
+                                                                                            "//android.widget.TextView[@text = 'face_photo.jpeg']")
+                    com_android_documentsui_colon_id_slash_icon_thumb2.click()
+
+
+                    # 24. Click 'Continue'
+                    _continue = driver.find_element(By.XPATH,
+                                                    "//android.widget.Button[@text = 'Continue']")
+                    _continue.click()
+
+                    # 25. Click 'Please wait while your information is...'
+                    please_wait_while_your_information_is_ = driver.find_element(By.XPATH,
+                                                                                "//android.view.View[@text = 'Please wait while your information is being verified']")
+                    # please_wait_while_your_information_is_.click()
+
+                    # 26. Click 'Verification successful'
+                    verification_successful = driver.find_element(By.XPATH,
+                                                                "//android.view.View[@text = 'Verification successful']")
+                    verification_successful.click()
+
+                    # 27. Click 'Proceed'
+                    proceed = driver.find_element(By.XPATH,
+                                                                "//android.widget.Button[@text = 'Proceed']")
+                    proceed.click()
+                    print("shufti flow completed, returning now")
+                    
+                    tr = True
+                    status = "PASS"
+                    message = "shufti verification completed successfully"
+            elif submitprooffound:
+                print("flow of simple app view")
                 
-                # android_colon_id_slash_icon.send_keys(r'C:\Users\Administrator\Desktop\pyppium_new_app\data\ID_front.jpeg')
-                android_colon_id_slash_icon.click()
-                print("\n\n\n self.driver.context is current context",self.driver.current_context)
-
-                # 10. Click 'com.android.documentsui:id/icon_thumb'
-                com_android_documentsui_colon_id_slash_icon_thumb = driver.find_element(By.XPATH,
-                                                                                        "//android.widget.TextView[@text = 'ID_front.jpeg']")
-                com_android_documentsui_colon_id_slash_icon_thumb.click()
-
-                # # 11. Click 'More options'
-                # more_options = driver.find_element(By.XPATH,
-                #                                 "//android.widget.ImageButton[@content-desc = 'More options']")
-                # more_options.click()
-
-                # 12. Click 'Continue'
-                # wait_until(d,"//android.view.View[@text = 'Can you see the entire document clearly in the photo?'])",'visible')
-                print("clicking on continue to confirm")
-                _continue = driver.find_element(By.XPATH,
-                                                "//android.widget.Button[@text = 'Continue']")
-                _continue.click()
-
-                # 13. Click 'Upload1'
-                print("uploading backside of the national id")
+                driver.find_element(By.XPATH,
+                                            "//android.widget.TextView[@text = 'Upload from your device']").click()
+                wait_until(d,"//android.widget.TextView[@text = 'Upload a photo of your entire face']",'visible')
                 
+                driver.find_element(By.XPATH,
+                                            "//android.widget.Button[@text = 'Upload']").click()
+                print("selecting face photo from gallery")
+                face_photoingallery = driver.find_element(By.XPATH,
+                                                                                            "//android.widget.TextView[@text = 'face_photo.jpeg']")
+                face_photoingallery.click()
+                print("waiting for confirmation")
+                verification = driver.find_element(By.XPATH,"//android.widget.RelativeLayout[1]/android.widget.TextView[@text = 'Verification']")
+                checkassert(d,verification,'visible')
                 
-                wait_until(d,"//android.view.View[@text = 'Upload a photo of the backside of your Bahraini National ID']",'visible')
+                yes_continue = driver.find_element(By.XPATH,"//android.widget.Button[@text = 'Yes, Continue']")
+                yes_continue.click()
+                print("clicked yes,continue to uplaod face")
                 
+                wait_until(d,"//android.widget.TextView[@text = 'Document Verification']",'visible')
+                doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
                 
-                upload1 = driver.find_element(By.XPATH,
-                                            "//android.widget.Button[@text = 'Upload']")
-                upload1.click()
-                print("\n\n\n self.driver.context is current context",self.driver.current_context)
-
-                # 14. Click 'android:id/icon' image chooser found selecting files
-                android_colon_id_slash_icon = driver.find_element(By.XPATH,
-                                                                "//android.widget.TextView[@text = 'Files']")
-                android_colon_id_slash_icon.click()
+                print("checking if reached document verification ")
+                checkassert(d,doc_verification,'visible')
+                continuebutton = driver.find_element(By.XPATH,"//android.widget.Button[@text = 'Continue']")
+                continuebutton.click()
+                print("submiting proof")
+                submitdocprooffound = wait_until(d,"//android.widget.TextView[@text = 'How will you submit the identity proof ?']",'visible')
                 
-
-
-                # 15. Click 'com.android.documentsui:id/icon_thumb1'
-                # com_android_documentsui_colon_id_slash_icon_thumb1 = driver.find_element(By.XPATH,
-                                                                                        # "//android.widget.LinearLayout[2]//android.widget.ImageView")
-                com_android_documentsui_colon_id_slash_icon_thumb1 = driver.find_element(By.XPATH,
-                                                                                        "//android.widget.TextView[@text = 'ID_back.jpeg']")
+                driver.find_element(By.XPATH,
+                                            "//android.widget.TextView[@text = 'Upload from your device']").click()
+                # wait_until(d,"//android.widget.TextView[@text = 'Upload a photo of your entire face']",'visible')
+                # //android.widget.RelativeLayout[1]/android.widget.TextView[@text = 'Document Verification']
+                print("checking if reached document verification ")
                 
-                print("\n\n\n self.driver.context is current context after file click",self.driver.current_context)
+                doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
                 
+                checkassert(d,doc_verification,'visible', assertname='Document Verification text check')
+                frontsidebahrincardtext = "//android.widget.TextView[@text = 'Upload a photo of front side of your Bahraini ID Card']"
+                wait_until(d,frontsidebahrincardtext,'visible')
+                # wait_until(d,"//android.widget.TextView[@text = 'frontsidebahrincardtext']",'visible')
+                print("clicking on upload button")
+                driver.find_element(By.XPATH,
+                                            "//android.widget.Button[@text = 'Upload']").click()
+                print("selecting ID_front.jpeg")
                 
-                com_android_documentsui_colon_id_slash_icon_thumb1.click()
-
-                # # 16. Click 'More options'
-                # more_options = driver.find_element(By.XPATH,
-                #                                 "//android.widget.ImageButton[@content-desc = 'More options']")
-                # more_options.click()
-
-                # 17. Click 'Can you see the entire document clear...'
-                can_you_see_the_entire_document_clear_ = driver.find_element(By.XPATH,
-                                                                            "//android.view.View[@text = 'Can you see the entire document clearly in the photo?']")
-                can_you_see_the_entire_document_clear_.click()
-
-                # 18. Click 'Continue'
-                _continue = driver.find_element(By.XPATH,
-                                                "//android.widget.Button[@text = 'Continue']")
-                _continue.click()
-                wait_until(d,"//android.view.View[@text = 'Uploading document ...']",'not visible')
+                idfrontingallery = driver.find_element(By.XPATH,
+                                                           "//android.widget.TextView[@text = 'ID_front.jpeg']")
+                idfrontingallery.click()
+                docclaritytext = "//android.widget.TextView[@text = 'Can you see the entire document clearly in the photo?']"
+                verification = driver.find_element(By.XPATH,docclaritytext)
+                checkassert(d,verification,'visible',assertname='Can you see the entire document clearly in the photo? text check')
+                yes_continue = driver.find_element(By.XPATH,"//android.widget.Button[@text = 'Yes, Continue']")
+                yes_continue.click()
+                print("clicked yes,continue to upload id_front")
                 
-                print("uplaoding face")
-                wait_until(d,"//android.view.View[@text = 'How would you like to verify your face?']",'visible')
-
-                # 19. Click 'Upload file'
-                upload_file = driver.find_element(By.XPATH,
-                                                "//android.widget.Button[@text = 'Upload file ']")
-                upload_file.click()
-                # driver.switch_to.context('WEBVIEW')
-
-                # 20. Click 'Upload'      self.driver.find_element_by_partial_link_text("YOUR CHOICES")
-                upload = driver.find_element(By.XPATH,
-                                            "//android.widget.Button[@text = 'Upload']")
-                upload.click()
-
-                # 21. Click 'android:id/icon'
-                android_colon_id_slash_icon = driver.find_element(By.XPATH,
-                                                                "//android.widget.TextView[@text = 'Files']")
-                                                                
-                                                                # "//android.widget.LinearLayout[2]//android.widget.ImageView")
-                android_colon_id_slash_icon.click()
-
-                # 22. Click 'com.android.documentsui:id/icon_thumb2'
-                com_android_documentsui_colon_id_slash_icon_thumb2 = driver.find_element(By.XPATH,
-                                                                                        "//android.widget.TextView[@text = 'face_photo.jpeg']")
-                com_android_documentsui_colon_id_slash_icon_thumb2.click()
-
-
-                # 24. Click 'Continue'
-                _continue = driver.find_element(By.XPATH,
-                                                "//android.widget.Button[@text = 'Continue']")
-                _continue.click()
-
-                # 25. Click 'Please wait while your information is...'
-                please_wait_while_your_information_is_ = driver.find_element(By.XPATH,
-                                                                            "//android.view.View[@text = 'Please wait while your information is being verified']")
-                # please_wait_while_your_information_is_.click()
-
-                # 26. Click 'Verification successful'
-                verification_successful = driver.find_element(By.XPATH,
-                                                            "//android.view.View[@text = 'Verification successful']")
-                verification_successful.click()
-
-                # 27. Click 'Proceed'
-                proceed = driver.find_element(By.XPATH,
-                                                            "//android.widget.Button[@text = 'Proceed']")
-                proceed.click()
-                print("shufti flow completed, returning now")
+                print("checking if reached document verification ")
                 
-                tr = True
-                status = "PASS"
-                message = "shufti verification completed successfully"
-            
+                doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
+                
+                checkassert(d,doc_verification,'visible', assertname='Document Verification text check')
+                backsidebahrincardtext = "//android.widget.TextView[@text = 'Upload a photo of back side of your Bahraini ID Card']"
+                wait_until(d,backsidebahrincardtext,'visible')
+                print("clicking on upload button")
+                driver.find_element(By.XPATH,
+                                            "//android.widget.Button[@text = 'Upload']").click()
+                print("selecting ID_back.jpeg")
+                idbackingallery = driver.find_element(By.XPATH,
+                                                           "//android.widget.TextView[@text = 'ID_back.jpeg']")
+                idbackingallery.click()
+                docclaritytext = "//android.widget.TextView[@text = 'Can you see the entire document clearly in the photo?']"
+                verification = driver.find_element(By.XPATH,docclaritytext)
+                checkassert(d,verification,'visible',assertname='Can you see the entire document clearly in the photo? text check')
+                yes_continue = driver.find_element(By.XPATH,"//android.widget.Button[@text = 'Yes, Continue']")
+                yes_continue.click()
+                print("clicked yes,continue to upload id_back")
+                print("checking for shufti progress")
+                # wait_until()
+                wait_until(d,"//android.widget.TextView[@text = 'Verifying your Identity']",'not visible')
+                wait_until(d,"//android.widget.TextView[@text = 'Please Wait...']",'not visible')
+                
+                # com.bfccirrus.bfcpayments.mobile:id/main_tv
+                wait_until(d,'com.bfccirrus.bfcpayments.mobile:id/main_tv','visible')
+                # driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Verified']")
+                verifiedtext = driver.find_element(By.ID,'com.bfccirrus.bfcpayments.mobile:id/main_tv')
+                if checkassert(d,verifiedtext.text,'==','Verified','check if verified in response screen'):
+                    print("shufti porcess success")
+                    identityverified = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Your identity has been Verified']")
+                     
+                    tr = checkassert(d,identityverified,'visible',assertname='checking for text -"Your identity has been Verified"-present?')
+                    (status,message) = ("PASS","shufti verification completed successfully") if tr else ("FAIL","shufti verification failed")
+                    print("clicking proceed to complete process")
+                    print("if screen is consent screen, then shufti is failed from their end, write a check case here")
+                    # it will redirect to last native screen that is consent screen 
+                    # .to check this fail no need to scroll just check "Yes,proceed" of consent is vibible
+                    #or doing a shufti initiation again from clicking consent might do the work
+                    driver.find_element(By.XPATH,
+                                            "//android.widget.Button[@text = 'Proceed']").click()
+                else:
+                    print("shufti response is ",verifiedtext.text)
+                    verifiedsubtext = driver.find_element(By.ID,'com.bfccirrus.bfcpayments.mobile:id/secound_tv')
+                    print("shufti response text is ",verifiedsubtext.text)
+                    tr = False
+                    status = 'FAILED' 
+                    message = verifiedtext.text+" : "+verifiedsubtext.text+" shufti verification failed , check shufti log!"
+                    ## raise failed(test_name,'Message :'+verifiedtext.text+" : "+verifiedsubtext.text)
+
             else:
                 tr = False
                 status = "FAIL"
                 print("national id submition page not reached")
                 raise failed(test_name,"submition page not reached")
-            
-            # print("check cancel button present ") #com.bfccirrus.bfcpayments.mobile:id/btnCancel
-            # print("click com.bfccirrus.bfcpayments.mobile:id/btnProceed (yes,proceed") #//android.widget.Button[@text = 'Yes, Proceed']
-            # print("wait for shufti loading disablrd") #com.bfccirrus.bfcpayments.mobile:id/main_tv
-            # print("check and confirm reached - //android.view.View[@text = 'How would you like to submit your National ID ?']")
-            
-            
-            
-            
-            # print("after image update check to finish this ,//android.view.View[@text = 'Please wait while your information is being verified']")
-            # print('click proceed')
-            # print("then after clicking proceed , check this is invisible //android.view.View[@text = 'Redirecting, please wait…']")
-            # print("check if reached dsahboard")
 
         else:
             print("shufti couldnt be initialted as consent screen not found")
             
     except Exception as e:
         print(e)
+        save_screenshot(d,'shufti_initiation_'+outputtime)
         tr = False
         status = 'Fail'
         message = e
@@ -1056,14 +1244,14 @@ def feed_signin(self,logged ):
                 if not checkassert(d,'changemobile' in expectedloginflow , "expected flow check"):
                     print("expected flow cannot be executed , proceeding with normal flow.")
             d.find_element_by_xpath("//android.widget.Button[@text = 'Proceed']").click()
-            check_progressbar(d)
+            check_progressbar(d) 
             enterotplabel = d.find_element(By.ID,"txtLabelAlmostHere").text
             if '****' in enterotplabel:
-                
-                txt ="Enter the 6 digit OTP sent to +973 "+formattednumber
+                #adding a space for the sake of the test case. between 'to +9'
+                txt ="Enter the 6 digit OTP sent to   +973 "+formattednumber
                 print("this number has registered once")
             else:
-                txt ="Enter the 6 digit OTP sent to +973 "+loggedmobile
+                txt ="Enter the 6 digit OTP sent to   +973 "+loggedmobile
                 print("first time registering this number")
             checkassert(d,enterotplabel ,"==",txt,"enter OTP label displayed?")
             # id	@id/edtOtp
@@ -1146,7 +1334,7 @@ def feed_signin(self,logged ):
         print("checking current activity is dashboard ,if not the flow might have changed to shufti")
         if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
             if tr:
-                message = message + " , But the activity dashboard not reached"
+                message = message + " , But also the activity dashboard not reached"
                 tr = "warn"
                 checkshufti = d.find_element(By.ID,'txtVerifyDobLabel') and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
                 if checkshufti:

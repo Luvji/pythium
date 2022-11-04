@@ -44,7 +44,7 @@ def generator(n=1):
     jsondata = {}
     logindata = {}
     current_time = str(datetime.now().strftime("%H-%M-%S"))
-    gender = ['male','female']
+    gender = ['MALE','FEMALE']
     addresstype = ['home','office','work','other']
     language = ['english','hindi','malayalam']
     except_nation = ["British Indian Ocean Territory (Chagos Archipelago)","Montenegro"]
@@ -72,14 +72,15 @@ def generator(n=1):
         data[x]['Gender'] = selectedgender
         # data[x]['EmployeeCPRId'] = str(random_cpr_and_mobile("cpr"))
         data[x]['EmployeeCPRId'] = str(cpr)
-        data[x]['CPRExpiryDate'] = (fake.date_between(start_date='today', end_date='+30y')).strftime("%m/%d/%Y")
+        data[x]['CPRExpiryDate'] = (fake.date_between(start_date='+2y', end_date='+30y')).strftime("%m/%d/%Y")
         data[x]['MobileNumber'] = str(random_cpr_and_mobile("m"))
         data[x]['EmailId'] = fake.email()
         data[x]['PlaceOfBirth'] = fake.city()
         data[x]['DateOfBirth'] =fake.date()
         data[x]['Nationality'] = fake.country()
         data[x]['PassportNumber'] = fake.bothify(text='????#####')
-        data[x]['PassportExpiry'] = (fake.future_date()).strftime("%m/%d/%Y")
+        # data[x]['PassportExpiry'] = (fake.future_date()).strftime("%m/%d/%Y")
+        data[x]['PassportExpiry'] = (fake.date_between(start_date='+2y', end_date='+30y')).strftime("%m/%d/%Y")
         data[x]['AddressType'] = random.choice(addresstype)
         data[x]['FlatNumber'] =fake.bothify(text='????##')
         data[x]['BuildingNumber'] =fake.bothify(text='?##')
@@ -90,11 +91,11 @@ def generator(n=1):
         data[x]['Occupation'] = fake.job()
         print("x is ",data[x])
         print("x is ",data[x]['MobileNumber'])
-        # expect,testcase,reason
-        logindata[x] = data[x]
-        logindata[x]['expect'] = None
-        logindata[x]['testcase']=None
-        logindata[x]['reason']=None
+        # # expect,testcase,reason
+        # logindata[x] = data[x]
+        # logindata[x]['expect'] = None
+        # logindata[x]['testcase']=None
+        # logindata[x]['reason']=None
         
         jsondata[data[x]['EmployeeCPRId']]['MobileNumber'] = data[x]['MobileNumber']
         jsondata[data[x]['EmployeeCPRId']]['EmployeeCPRId'] = data[x]['EmployeeCPRId']
