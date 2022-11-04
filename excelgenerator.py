@@ -1,4 +1,4 @@
-import ast
+ 
 from datetime import datetime
 import os
 from random import randint, random
@@ -9,11 +9,7 @@ from faker import Faker
 import pandas as pd
 from os.path import exists
 import json
-
-
-
-
-
+ 
 fake = Faker()
 
 # rand = random.randrange(20, 50, 3)
@@ -57,8 +53,9 @@ def generator(n=1):
         selectedlang = random.choice(language)
         print("selected gender",selectedgender)
         # write operation perform
-        while fake.country(x) in except_nation:
-            fake_country = fake.country(x)
+        fake_country = fake.country(x)
+        while fake_country in except_nation:
+            fake_country = fake.country()
             # print ("fake_country = ",fake_country)
         if selectedgender == 'male':
             data[x]['FirstName'] =  fake.first_name_male()
@@ -77,7 +74,7 @@ def generator(n=1):
         data[x]['EmailId'] = fake.email()
         data[x]['PlaceOfBirth'] = fake.city()
         data[x]['DateOfBirth'] =fake.date()
-        data[x]['Nationality'] = fake.country()
+        data[x]['Nationality'] = fake_country
         data[x]['PassportNumber'] = fake.bothify(text='????#####')
         # data[x]['PassportExpiry'] = (fake.future_date()).strftime("%m/%d/%Y")
         data[x]['PassportExpiry'] = (fake.date_between(start_date='+2y', end_date='+30y')).strftime("%m/%d/%Y")
@@ -96,11 +93,19 @@ def generator(n=1):
         # logindata[x]['expect'] = None
         # logindata[x]['testcase']=None
         # logindata[x]['reason']=None
-        
-        jsondata[data[x]['EmployeeCPRId']]['MobileNumber'] = data[x]['MobileNumber']
+# to format this in feeder
         jsondata[data[x]['EmployeeCPRId']]['EmployeeCPRId'] = data[x]['EmployeeCPRId']
+        jsondata[data[x]['EmployeeCPRId']]['FirstName'] = data[x]['FirstName']
+        jsondata[data[x]['EmployeeCPRId']]['MobileNumber'] = data[x]['MobileNumber']
         jsondata[data[x]['EmployeeCPRId']]['DateOfBirth'] = data[x]['DateOfBirth']
-        jsondata[data[x]['EmployeeCPRId']]['status'] = "False"
+        jsondata[data[x]['EmployeeCPRId']]['PassportNumber'] = data[x]['PassportNumber']
+        jsondata[data[x]['EmployeeCPRId']]['userpin'] = '123321'
+        jsondata[data[x]['EmployeeCPRId']]['Otp'] = '111111'
+        jsondata[data[x]['EmployeeCPRId']]['EmailId'] = data[x]['EmailId']
+        jsondata[data[x]['EmployeeCPRId']]['status'] = None
+        jsondata[data[x]['EmployeeCPRId']]['expect'] = None
+        jsondata[data[x]['EmployeeCPRId']]['testcase'] = None
+        jsondata[data[x]['EmployeeCPRId']]['reason'] = None
     
     df = pd.DataFrame(data).transpose()
     # jsdf=  pd.DataFrame(jsondata).transpose()
@@ -118,18 +123,29 @@ def generator(n=1):
     # print(path4)
     excelpath = os.path.join(path4,"excel"+current_time+".xlsx")
     print(excelpath)
-    df.to_csv(os.path.join(path4,"logindata"+current_time+".csv"),index = False)
-    df.to_excel(excelpath, index=False)
-    df.to_excel(os.path.join(parent_dir,"Output",date,"data","excel"+current_time+".xlsx"), index=False)
-    
-    jsonpath =  os.path.join(path4,'cprjsondata.json')
+# create csv
+    csvpath =os.path.join(path4,"logindata"+current_time+".csv") #pwd/{date}/data/logindata{time}.csv
+    df.to_csv(csvpath,index = False)
+    print("CSV file created as :",csvpath)
+    df.to_excel(excelpath, index=False) ##pwd/{date}/data/excel{time}.xlsx
+    print("EXCEL file created as :",excelpath)
+#duplicating csv,excel to ensure data stability output folder will be ignored in github
+    excelpath2 = os.path.join(parent_dir,"Output",date,"data","excel"+current_time+".xlsx")
+    df.to_excel(excelpath2, index=False)
+    print( "duplicated excel file created in output as :",excelpath2)#pwd/Output/{date}/data/excel{time}.xlsx   
+    csvpath2 = os.path.join(parent_dir,"Output",date,"data","csv"+current_time+".csv")
+    df.to_csv(csvpath2,index = False)
+    print("duplicated CSV file created in output as :",csvpath2)#pwd/Output/{date}/data/csv{time}.csv
+
+    jsonpath =  os.path.join(path4,'cprjsondata'+current_time+'.json') #pwd/{date}/data
     if exists(jsonpath):
+    # added time to jsom file name,now this check may be not necessary unless it is created on same time but dif day
+        
         with open(jsonpath,'r+', encoding='utf-8') as jsonfile:
         # First we load existing data into a dict.
             my_data = json.load(jsonfile)
             point = len(my_data)
-            formatteddata = {}
-            
+            formatteddata = {} 
             # start = len(my_data) # 2
             # end = len(jsondata)+start # 2
             # i = 0
@@ -145,20 +161,16 @@ def generator(n=1):
             #JSON is re writing the whole file. we need find a better way.
             print("JSON file updated")
     else :
-        print("file doesnot exist")
+        print("file doesnot exist,creating new")
         with open(jsonpath, 'w') as f:
-            print("The json file is created")
+            print("The json file is created,adding data")
             json_object = json.dumps(jsondata, indent=4)
             print("The json object data is created")
             f.write(json_object)
             print("json is written into newly created json file")
-            
-            
+       
 #calling function here
 def generatecsv():
     print("csv generator invoked")
-    
-
-
 
 generator(10)
