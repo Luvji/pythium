@@ -1071,68 +1071,68 @@ def shufti_initiation(self,minimal = True):
     finally:
         return tr,status,message
     
-# a feeder function to feed multiple test case data - INCOMPLETE - ON HOLD
-def login_feeder(self,minimal = False):
-    print("tis is login feeder")
-    driver = d = self.driver
-    tr = False
-    test_name1 = 'login_feeder'
-    message = ""
-    finaltr = ''
-    feederresult = {}
-    # tc1 = tc2 = tc3 = False
-    status = True
-    fullmessage = ""
-    respmesg = ''
-    global feedercheck
-    fcsv = format_csv(r'C:\Users\Administrator\Desktop\pyppium_new_app\2022-10-19\data\logindata17-10-51.csv')
-    print("\n",YELLOW,fcsv,CRESET)
-    # print("\n\n\n\n\n")
-    # print(fcsv,"\n\n\n\n")
-    # print(fcsv.keys())
-    logged = {}
+# # a feeder function to feed multiple test case data - INCOMPLETE - ON HOLD
+# def login_feeder(self,minimal = False):
+#     print("tis is login feeder")
+#     driver = d = self.driver
+#     tr = False
+#     test_name1 = 'login_feeder'
+#     message = ""
+#     finaltr = ''
+#     feederresult = {}
+#     # tc1 = tc2 = tc3 = False
+#     status = True
+#     fullmessage = ""
+#     respmesg = ''
+#     global feedercheck
+#     fcsv = format_csv(r'C:\Users\Administrator\Desktop\pyppium_new_app\2022-10-19\data\logindata17-10-51.csv')
+#     print("\n",YELLOW,fcsv,CRESET)
+#     # print("\n\n\n\n\n")
+#     # print(fcsv,"\n\n\n\n")
+#     # print(fcsv.keys())
+#     logged = {}
 
 
-    if len(fcsv.keys())>0:
-        for key,value in fcsv.items():
-            print("⣿"*os.get_terminal_size().columns)
-            print("\n\u001b[4m\u001b[44m STARTING NEW TEST WITH TEST DATA -\u001b[0m")
-            print(key ," : ", list[value])
-            print(CRESET+"."*os.get_terminal_size().columns)
+#     if len(fcsv.keys())>0:
+#         for key,value in fcsv.items():
+#             print("⣿"*os.get_terminal_size().columns)
+#             print("\n\u001b[4m\u001b[44m STARTING NEW TEST WITH TEST DATA -\u001b[0m")
+#             print(key ," : ", list[value])
+#             print(CRESET+"."*os.get_terminal_size().columns)
             
             
-            print("this is something")
-            logged = {}
-            print("key is",key)
-            print("value is ",value)
-            logged['cpr'] = fcsv[key]['EmployeeCPRId']
-            logged['mobile'] = fcsv[key]['MobileNumber']
-            logged['name'] = fcsv[key]['FirstName']
-            logged['dob'] = fcsv[key]['DateOfBirth']
-            logged['expectedloginflow'] = ['shufti']
-            # fcsv = format_csv(csvpath) 
-            print(RED,"this is current logged data",logged,CRESET)
-            try:
-                d.start_activity("com.bfccirrus.bfcpayments.mobile", 'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity')
-                wait_until_activity(d,'com.bfc.bfcpayments.modules.onboarding_journey.view.ui.SignUpSliderActivity','visible')
-                print("current activity is",d.current_activity)
-                tr = feed_signin(self,logged)
-                feedercheck['paybywallet'].append({'name':fcsv[key]['name'],
-                                              'cpr':fcsv[key]['cpr'],
-                                              'amount' :fcsv[key]['amount'],
-                                              'testcase' :testcasename,
-                                              'status':tr,
-                                              'reason':respmesg,
-                                              'expected':fcsv[key]['expect'],
-                                              'final_Result':finalres })
+#             print("this is something")
+#             logged = {}
+#             print("key is",key)
+#             print("value is ",value)
+#             logged['cpr'] = fcsv[key]['EmployeeCPRId']
+#             logged['mobile'] = fcsv[key]['MobileNumber']
+#             logged['name'] = fcsv[key]['FirstName']
+#             logged['dob'] = fcsv[key]['DateOfBirth']
+#             logged['expectedloginflow'] = ['shufti']
+#             # fcsv = format_csv(csvpath) 
+#             print(RED,"this is current logged data",logged,CRESET)
+#             try:
+#                 d.start_activity("com.bfccirrus.bfcpayments.mobile", 'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity')
+#                 wait_until_activity(d,'com.bfc.bfcpayments.modules.onboarding_journey.view.ui.SignUpSliderActivity','visible')
+#                 print("current activity is",d.current_activity)
+#                 tr = feed_signin(self,logged)
+#                 feedercheck['paybywallet'].append({'name':fcsv[key]['name'],
+#                                               'cpr':fcsv[key]['cpr'],
+#                                               'amount' :fcsv[key]['amount'],
+#                                               'testcase' :test_name1,
+#                                               'status':tr,
+#                                               'reason':respmesg,
+#                                               'expected':fcsv[key]['expect'],
+#                                               'final_Result':finalres })
                 
                 
                 
                 
                 
                 
-            except Exception as e:
-                print(e)
+#             except Exception as e:
+#                 print(e)
                 
 # re written attempt on feeder function to feed multiple test case data - INCOMPLETE - ON HOLD   
 def feed_signin(self,logged ):
@@ -1374,276 +1374,277 @@ def feed_signin(self,logged ):
         testcasereport(test_name,status,message)
         return tr
 
-#sample code for feeder for reference remove it after development
-def xxxxxxxxxpaybywalletfeeder(self):
-    d = self.driver
-    driver = d
-    tr = False
-    test_name1 = 'paybywalletfeeder'
-    message = ""
-    finaltr = ''
-    feederresult = {}
-    tc1 = tc2 = tc3 = False
-    status = True
+# #sample code for feeder for reference remove it after development
+# def xxxxxxxxxpaybywalletfeeder(self):
+    
+#     d = self.driver
+#     driver = d
+#     tr = False
+#     test_name1 = 'paybywalletfeeder'
+#     message = ""
+#     finaltr = ''
+#     feederresult = {}
+#     tc1 = tc2 = tc3 = False
+#     status = True
    
-    fullmessage = ""
-    respmesg = ''
-    global feedercheck
+#     fullmessage = ""
+#     respmesg = ''
+#     global feedercheck
     
 
-    try:
-        print("\n\n")
-        global fcsv
-        fcsv = format_csv(csvpath) 
-        print(fcsv)
-        print(fcsv.keys())
-        # success only if csv has value
-        # print(0/0)
-        print("turning off force")
+#     try:
+#         print("\n\n")
+#         global fcsv
+#         fcsv = format_csv(csvpath) 
+#         print(fcsv)
+#         print(fcsv.keys())
+#         # success only if csv has value
+#         # print(0/0)
+#         print("turning off force")
         
-        force = False
-        print("this is force::::::::::::::",force)
-        if force: #ensure minimum balance, if false , test will continue without trying to add money,
-            #which might shows failed
-            #check balance needed
-            totalamountinfeeder = sum(float(dkey['amount']) for dkey in fcsv.values() if dkey)
-            print("this is total amount needed :",totalamountinfeeder)
+#         force = False
+#         print("this is force::::::::::::::",force)
+#         if force: #ensure minimum balance, if false , test will continue without trying to add money,
+#             #which might shows failed
+#             #check balance needed
+#             totalamountinfeeder = sum(float(dkey['amount']) for dkey in fcsv.values() if dkey)
+#             print("this is total amount needed :",totalamountinfeeder)
             
-            currentbalance = go_and_check_dashboardbalance(d)
-            print("current balance = ",currentbalance)
+#             currentbalance = go_and_check_dashboardbalance(d)
+#             print("current balance = ",currentbalance)
             
-            if (currentbalance is None):
-                print("current balance fetch is unsuccessful")
-                raise failed(test_name1,"current balance is unfetchable")
+#             if (currentbalance is None):
+#                 print("current balance fetch is unsuccessful")
+#                 raise failed(test_name1,"current balance is unfetchable")
                 
-            else:
-                print("current balance check successfull",currentbalance)
+#             else:
+#                 print("current balance check successfull",currentbalance)
 
                 
-            if currentbalance>=totalamountinfeeder:
-                print("minimum amount is available. Current balance = ",currentbalance)
-            else:
-                #call add money to input required balance.
-                print("proceeding to add money feeder total amt :",totalamountinfeeder,"current balance :",currentbalance)
+#             if currentbalance>=totalamountinfeeder:
+#                 print("minimum amount is available. Current balance = ",currentbalance)
+#             else:
+#                 #call add money to input required balance.
+#                 print("proceeding to add money feeder total amt :",totalamountinfeeder,"current balance :",currentbalance)
                 
-                addamount = 10**(len(str(abs(int(totalamountinfeeder))))) #rounding the figure to higher value
+#                 addamount = 10**(len(str(abs(int(totalamountinfeeder))))) #rounding the figure to higher value
                 
-                if addamount > addmoneyupperlimit: # check the limit
-                    if totalamountinfeeder - currentbalance >addmoneyupperlimit : #possible way to pass the condition
-                        raise failed(test_name1,"the total feeder amount '",totalamountinfeeder,"' exceeds the 'add money upper limit '",addmoneyupperlimit  )
-                    else:
-                        addamount = totalamountinfeeder - currentbalance
-                else:
-                    ... # amount can be added
-                    pass
+#                 if addamount > addmoneyupperlimit: # check the limit
+#                     if totalamountinfeeder - currentbalance >addmoneyupperlimit : #possible way to pass the condition
+#                         raise failed(test_name1,"the total feeder amount '",totalamountinfeeder,"' exceeds the 'add money upper limit '",addmoneyupperlimit  )
+#                     else:
+#                         addamount = totalamountinfeeder - currentbalance
+#                 else:
+#                     ... # amount can be added
+#                     pass
                         
                         
                         
-                if(d.current_activity != dashboardactivity):
-                    back_to_dashboard(d)
-                add_money_click(self)
-                try:
+#                 if(d.current_activity != dashboardactivity):
+#                     back_to_dashboard(d)
+#                 add_money_click(self)
+#                 try:
                     
-                    addmoneysuccess = add_money_to_wallet_from_input(self,addamount,test_name = 'feeder')
-                    # addmoneysuccess = add_money_to_wallet_from_card_by_BHD_40_button(self)
-                except Exception as e:
-                    addmoneysuccess = False
-                    print(e) 
+#                     addmoneysuccess = add_money_to_wallet_from_input(self,addamount,test_name = 'feeder')
+#                     # addmoneysuccess = add_money_to_wallet_from_card_by_BHD_40_button(self)
+#                 except Exception as e:
+#                     addmoneysuccess = False
+#                     print(e) 
                     
-                if not addmoneysuccess:
-                    print("add money failed with force on , and there is no balance to continue")
-                    tr = 'warn'
-                    raise failed(test_name1,'add money failed with force on , and there is no balance to continue')
+#                 if not addmoneysuccess:
+#                     print("add money failed with force on , and there is no balance to continue")
+#                     tr = 'warn'
+#                     raise failed(test_name1,'add money failed with force on , and there is no balance to continue')
                     
-        else:
-            #only check balance needed
-            totalamountinfeeder = sum(int(dkey['amount']) for dkey in fcsv.values() if dkey)
-            print("total amount needed :",totalamountinfeeder)
-        #dictionary is not empty
-        # print("fcsv.items():::::::::::::::::::::::::::::::::::::::::::::::::::::\n",fcsv.items())
-        # print("\n\nfcsv lenght LLLLLLLLLLLLLLLLLLLLL",len(fcsv.keys()))
-        if len(fcsv.keys())>0:
-            for key,value in fcsv.items():
-                print("⣿"*os.get_terminal_size().columns)
-                print("\n\u001b[4m\u001b[44m STARTING NEW TEST WITH TEST DATA -\u001b[0m")
-                print(key ," : ", list[value])
-                print(CRESET+"."*os.get_terminal_size().columns)
-                #initialising key value
-                feederresult.update({key:dict()})
-                feederresult[key].update({'status':False})
-                feederresult[key].update({'tc1':str(tc1)})
-                feederresult[key].update({'tc2':str(tc2)})
-                feederresult[key].update({'tc3':str(tc3)})
-                try:
-                    d_status = back_to_dashboard(d,minimal=True)
-                    if d_status:
-                        p2p_click_status = p2p_click2(self,minimal=True)
-                        if p2p_click_status:
-                            resp,respmesg = paytoperson(self,cpr = key,amount = fcsv[key]['amount'])
-                            print("\u001b[1m CHECKING FOR TESTPASS CONDITIONS \u001b[0m")
-                            print("_"*os.get_terminal_size().columns)
+#         else:
+#             #only check balance needed
+#             totalamountinfeeder = sum(int(dkey['amount']) for dkey in fcsv.values() if dkey)
+#             print("total amount needed :",totalamountinfeeder)
+#         #dictionary is not empty
+#         # print("fcsv.items():::::::::::::::::::::::::::::::::::::::::::::::::::::\n",fcsv.items())
+#         # print("\n\nfcsv lenght LLLLLLLLLLLLLLLLLLLLL",len(fcsv.keys()))
+#         if len(fcsv.keys())>0:
+#             for key,value in fcsv.items():
+#                 print("⣿"*os.get_terminal_size().columns)
+#                 print("\n\u001b[4m\u001b[44m STARTING NEW TEST WITH TEST DATA -\u001b[0m")
+#                 print(key ," : ", list[value])
+#                 print(CRESET+"."*os.get_terminal_size().columns)
+#                 #initialising key value
+#                 feederresult.update({key:dict()})
+#                 feederresult[key].update({'status':False})
+#                 feederresult[key].update({'tc1':str(tc1)})
+#                 feederresult[key].update({'tc2':str(tc2)})
+#                 feederresult[key].update({'tc3':str(tc3)})
+#                 try:
+#                     d_status = back_to_dashboard(d,minimal=True)
+#                     if d_status:
+#                         p2p_click_status = p2p_click2(self,minimal=True)
+#                         if p2p_click_status:
+#                             resp,respmesg = paytoperson(self,cpr = key,amount = fcsv[key]['amount'])
+#                             print("\u001b[1m CHECKING FOR TESTPASS CONDITIONS \u001b[0m")
+#                             print("_"*os.get_terminal_size().columns)
                             
-                            tc1 = checkassert(d,d_status,'==',True,'Task_1: reach Dashboard success')
-                            tc2 = checkassert(d,p2p_click_status,'==',True,'Task_2: activity clicked P2p')
-                            tc3 =checkassert(d,resp,'==',True,'Task_3: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
-                            if not tc3:
-                                now = datetime.now()
-                                current_time = str(now.strftime("%H-%M-%S"))
-                                save_screenshot(d,'Task3:sendCPR'+str(key)+';Amt'+str(fcsv[key]['amount'])+current_time)
-                                print("saving screenshot"+YELLOW)
-                            print("below is tc1 ,tc2 ,tc3")
-                            print(tc1 , tc2 , tc3)
-                            if tc1 & tc2 & tc3 :
-                                print(CYAN+"TEST P2P PASSED FOR CPR : ",str(key),' .for amount : ',str(fcsv[key]['amount']),CRESET)
-                                feederresult[key].update({'status':'passed'})
-                                feederresult[key].update({'tc1':str(tc1)})
-                                feederresult[key].update({'tc2':str(tc2)})
-                                feederresult[key].update({'tc3':str(tc3)})
-                                tr =True
-                            else:
-                                if not tc3:
-                                    feederresult[key].update({'status':'failed'})
-                                    feederresult[key].update({'tc1':str(tc1)})
-                                    feederresult[key].update({'tc2':str(tc2)})
-                                    feederresult[key].update({'tc3':str(tc3)})
-                                    status = False
-                                    tr = False 
-                                else:
-                                    feederresult[key].update({'status':'failed'})
-                                    feederresult[key].update({'tc1':str(tc1)})
-                                    feederresult[key].update({'tc2':str(tc2)})
-                                    feederresult[key].update({'tc3':str(tc3)})
-                                    status = 'warn' if status else False
-                                    tr = False 
+#                             tc1 = checkassert(d,d_status,'==',True,'Task_1: reach Dashboard success')
+#                             tc2 = checkassert(d,p2p_click_status,'==',True,'Task_2: activity clicked P2p')
+#                             tc3 =checkassert(d,resp,'==',True,'Task_3: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
+#                             if not tc3:
+#                                 now = datetime.now()
+#                                 current_time = str(now.strftime("%H-%M-%S"))
+#                                 save_screenshot(d,'Task3:sendCPR'+str(key)+';Amt'+str(fcsv[key]['amount'])+current_time)
+#                                 print("saving screenshot"+YELLOW)
+#                             print("below is tc1 ,tc2 ,tc3")
+#                             print(tc1 , tc2 , tc3)
+#                             if tc1 & tc2 & tc3 :
+#                                 print(CYAN+"TEST P2P PASSED FOR CPR : ",str(key),' .for amount : ',str(fcsv[key]['amount']),CRESET)
+#                                 feederresult[key].update({'status':'passed'})
+#                                 feederresult[key].update({'tc1':str(tc1)})
+#                                 feederresult[key].update({'tc2':str(tc2)})
+#                                 feederresult[key].update({'tc3':str(tc3)})
+#                                 tr =True
+#                             else:
+#                                 if not tc3:
+#                                     feederresult[key].update({'status':'failed'})
+#                                     feederresult[key].update({'tc1':str(tc1)})
+#                                     feederresult[key].update({'tc2':str(tc2)})
+#                                     feederresult[key].update({'tc3':str(tc3)})
+#                                     status = False
+#                                     tr = False 
+#                                 else:
+#                                     feederresult[key].update({'status':'failed'})
+#                                     feederresult[key].update({'tc1':str(tc1)})
+#                                     feederresult[key].update({'tc2':str(tc2)})
+#                                     feederresult[key].update({'tc3':str(tc3)})
+#                                     status = 'warn' if status else False
+#                                     tr = False 
                                     
-                            print("TEST STATUS :: ",status)
+#                             print("TEST STATUS :: ",status)
                                     
-                        else:
+#                         else:
                             
-                            print("P2P click failed")
-                            tr =checkassert(d,p2p_click_status,'==',True,'task: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
-                            status = 'warn'
-                            break
+#                             print("P2P click failed")
+#                             tr =checkassert(d,p2p_click_status,'==',True,'task: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
+#                             status = 'warn'
+#                             break
 
-                    else:
-                        print("Dashboard activity failed")
-                        status = 'warn'
-                        tr = checkassert(d,d_status,'==',True,'task: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
-                        break
-                    print("this is tr after everything",tr)
+#                     else:
+#                         print("Dashboard activity failed")
+#                         status = 'warn'
+#                         tr = checkassert(d,d_status,'==',True,'task: sendCPR = '+str(key)+';Amount = '+str(fcsv[key]['amount']))
+#                         break
+#                     print("this is tr after everything",tr)
                     
-                except Exception as e:
-                    print(e)
-                    # if message == "" :
-                    #     message = "message not specified"
-                    message = e
-                finally:
-                    # print(fcsv)
-                    if finaltr == '':
-                        finaltr = tr
-                    elif finaltr == tr:
-                        pass #false == false | true ==true
-                    else: #finaltr == True and tr == False or finaltr == False and tr == True or any WARN
-                        finaltr = 'Warn'
+#                 except Exception as e:
+#                     print(e)
+#                     # if message == "" :
+#                     #     message = "message not specified"
+#                     message = e
+#                 finally:
+#                     # print(fcsv)
+#                     if finaltr == '':
+#                         finaltr = tr
+#                     elif finaltr == tr:
+#                         pass #false == false | true ==true
+#                     else: #finaltr == True and tr == False or finaltr == False and tr == True or any WARN
+#                         finaltr = 'Warn'
                         
                             
-                    print(YELLOW)
-                    print('TC data :')
-                    print(PURPLE)
-                    print('Name :',fcsv[key]['name'])
-                    print('cpr :',fcsv[key]['cpr'])
-                    print('Mobile :',fcsv[key]['mobile'])
-                    print('amount :',fcsv[key]['amount'])
-                    if respmesg != 'message not specified' or respmesg != '' :
-                        print('reason : ',respmesg)
-                    print(CRESET+"\u001b[1m")
-                    print('TC1:REACH DASHBOARD',feederresult[key]['tc1'])
-                    print('TC2:CLICK ON P2P BUTTON IN DASHBOARD',feederresult[key]['tc2'])
-                    print('TC3:SEND MONEY',feederresult[key]['tc3'])
-                    print(CRESET)
-                    if respmesg in ['' ,None , 'message not specified']:
-                        respmesg = message
-                    teststatus =feederresult[key]['tc1'].lower() and feederresult[key]['tc2'].lower() and feederresult[key]['tc3'].lower() in ('pass', "true", 'passed')
-                    testcasename = str(fcsv[key]['testcase']) if str(fcsv[key]['testcase']) is not (None or '') else 'send BHD '+str(fcsv[key]['amount'])+' to CPR '+fcsv[key]['cpr']
-                    # print("\n\n\n\n\n\n\n\n")
-                    # print(type(tr))
-                    # print(type(fcsv[key]['expect']))
-                    # print("::::::n\n\nXXXXX"+str(fcsv[key]['testcase'])+"XXXXX\n\nn")
-                    # print("this is tesct case::::\n\n",str(fcsv[key]['testcase']) is not None or '')
-                    # print("this is tescstcases :::::::",testcasename,":::::::::\n\n\n")
-                    currenttr = tr not in [False,'false','False','FALSE','FAIL','Fail','fail','WARN','Warn','warn']
+#                     print(YELLOW)
+#                     print('TC data :')
+#                     print(PURPLE)
+#                     print('Name :',fcsv[key]['name'])
+#                     print('cpr :',fcsv[key]['cpr'])
+#                     print('Mobile :',fcsv[key]['mobile'])
+#                     print('amount :',fcsv[key]['amount'])
+#                     if respmesg != 'message not specified' or respmesg != '' :
+#                         print('reason : ',respmesg)
+#                     print(CRESET+"\u001b[1m")
+#                     print('TC1:REACH DASHBOARD',feederresult[key]['tc1'])
+#                     print('TC2:CLICK ON P2P BUTTON IN DASHBOARD',feederresult[key]['tc2'])
+#                     print('TC3:SEND MONEY',feederresult[key]['tc3'])
+#                     print(CRESET)
+#                     if respmesg in ['' ,None , 'message not specified']:
+#                         respmesg = message
+#                     teststatus =feederresult[key]['tc1'].lower() and feederresult[key]['tc2'].lower() and feederresult[key]['tc3'].lower() in ('pass', "true", 'passed')
+#                     testcasename = str(fcsv[key]['testcase']) if str(fcsv[key]['testcase']) is not (None or '') else 'send BHD '+str(fcsv[key]['amount'])+' to CPR '+fcsv[key]['cpr']
+#                     # print("\n\n\n\n\n\n\n\n")
+#                     # print(type(tr))
+#                     # print(type(fcsv[key]['expect']))
+#                     # print("::::::n\n\nXXXXX"+str(fcsv[key]['testcase'])+"XXXXX\n\nn")
+#                     # print("this is tesct case::::\n\n",str(fcsv[key]['testcase']) is not None or '')
+#                     # print("this is tescstcases :::::::",testcasename,":::::::::\n\n\n")
+#                     currenttr = tr not in [False,'false','False','FALSE','FAIL','Fail','fail','WARN','Warn','warn']
 
-                    if fcsv[key]['expect'] in [False,'false','False','FALSE','FAIL','Fail','fail']:
-                        expected = False
-                    else:
-                        expected = True
-                    if tr == expected:
-                        finalres = 'Passed'
-                    else: 
-                        finalres = 'Failed'
+#                     if fcsv[key]['expect'] in [False,'false','False','FALSE','FAIL','Fail','fail']:
+#                         expected = False
+#                     else:
+#                         expected = True
+#                     if tr == expected:
+#                         finalres = 'Passed'
+#                     else: 
+#                         finalres = 'Failed'
                     
-                    # print("tr===fcsv[key]['expect']",tr==fcsv[key]['expect'])
-                    print("test result is expected to be",expected,"\nIs the result expected? ",tr==expected)
-                    feedercheck['paybywallet'].append({'name':fcsv[key]['name'],
-                                              'cpr':fcsv[key]['cpr'],
-                                              'amount' :fcsv[key]['amount'],
-                                              'testcase' :testcasename,
-                                              'status':tr,
-                                              'reason':respmesg,
-                                              'expected':fcsv[key]['expect'],
-                                              'final_Result':finalres })
-                    if teststatus:
-                        # feedercheck['paybywallet']['pass'] =  1 if not feedercheck['paybywallet']['pass'] else feedercheck['paybywallet']['pass'] +1
-                        feedercheck['pass'] =feedercheck['pass']+1
-                    else:
-                        # feedercheck['paybywallet']['fail'] =  1 if not feedercheck['paybywallet']['fail'] else feedercheck['paybywallet']['fail'] +1
+#                     # print("tr===fcsv[key]['expect']",tr==fcsv[key]['expect'])
+#                     print("test result is expected to be",expected,"\nIs the result expected? ",tr==expected)
+#                     feedercheck['paybywallet'].append({'name':fcsv[key]['name'],
+#                                               'cpr':fcsv[key]['cpr'],
+#                                               'amount' :fcsv[key]['amount'],
+#                                               'testcase' :testcasename,
+#                                               'status':tr,
+#                                               'reason':respmesg,
+#                                               'expected':fcsv[key]['expect'],
+#                                               'final_Result':finalres })
+#                     if teststatus:
+#                         # feedercheck['paybywallet']['pass'] =  1 if not feedercheck['paybywallet']['pass'] else feedercheck['paybywallet']['pass'] +1
+#                         feedercheck['pass'] =feedercheck['pass']+1
+#                     else:
+#                         # feedercheck['paybywallet']['fail'] =  1 if not feedercheck['paybywallet']['fail'] else feedercheck['paybywallet']['fail'] +1
                         
-                        feedercheck['fail'] =feedercheck['fail']+1
-                    ##############################################3
-                    ############################################3
+#                         feedercheck['fail'] =feedercheck['fail']+1
+#                     ##############################################3
+#                     ############################################3
                     
-                    #do expect value check
-                    ##########################################
-                    # feedercheck['failedtestcases'][x].values()
-                    print("tc for fcsv["+key+"] : completed ")
-        else:
-            print("\n\nCSV has no Value\n")
-            tr = False
-        # print("logic incomplete")
-    except failed as e:
-        print( LIGHTGREY+ "FULL ERROR PRINT",str(e) +"\n\n"+ traceback.format_exc() , CRESET)
+#                     #do expect value check
+#                     ##########################################
+#                     # feedercheck['failedtestcases'][x].values()
+#                     print("tc for fcsv["+key+"] : completed ")
+#         else:
+#             print("\n\nCSV has no Value\n")
+#             tr = False
+#         # print("logic incomplete")
+#     except failed as e:
+#         print( LIGHTGREY+ "FULL ERROR PRINT",str(e) +"\n\n"+ traceback.format_exc() , CRESET)
         
-        message = RED + e.message +CRESET
-        tr = False
+#         message = RED + e.message +CRESET
+#         tr = False
         
-    except Exception as e:
-        print("this is failed exception")
-        # fullmessage = str(e) +"\n\n"+ traceback.format_exc()
-        print( LIGHTGREY+ "FULL ERROR PRINT",str(e) +"\n\n"+ traceback.format_exc() , CRESET)
-        message = RED +e.args[1] +CRESET
-        tr = False
-    except:
-        print("this is something")
-    else:
-        print("this is in else of try catch")
-    finally:
+#     except Exception as e:
+#         print("this is failed exception")
+#         # fullmessage = str(e) +"\n\n"+ traceback.format_exc()
+#         print( LIGHTGREY+ "FULL ERROR PRINT",str(e) +"\n\n"+ traceback.format_exc() , CRESET)
+#         message = RED +e.args[1] +CRESET
+#         tr = False
+#     except:
+#         print("this is something")
+#     else:
+#         print("this is in else of try catch")
+#     finally:
 
-        print("\033[;34m\033[47m Execution of Test "+test_name1+" completed..!")
-        print("Final STATUS calculated :",finaltr)
-        print("Test result = "+str(tr) +"\033[m\033[0m")
-        status = finaltr
-        # print(feederresult)
-        # print("\n\n",feedercheck['paybywallet'])
-        #pay_wallet_feeder_testreport
-        exceltestreport('paybywallet',feedername = "")
-        # print("\n\n",feedercheck['pass'])
-        # print("\n\n",feedercheck['fail'])
-        if status == 'Warn' or 'warn':
-            message = YELLOW+"SOME TEST CASES IN FEEDPAYBYWALLET FAILED \n  "+CRESET +message
-        elif status == True:
-            message = GREEN+"ALL FEEDPAYBYWALLET TEST CASES PASSED \n  "+CRESET +message
-        elif status == False:
-            message = RED+"ALL FEEDPAYBYWALLET TEST CASES FAIlED \n  "+CRESET +message
+#         print("\033[;34m\033[47m Execution of Test "+test_name1+" completed..!")
+#         print("Final STATUS calculated :",finaltr)
+#         print("Test result = "+str(tr) +"\033[m\033[0m")
+#         status = finaltr
+#         # print(feederresult)
+#         # print("\n\n",feedercheck['paybywallet'])
+#         #pay_wallet_feeder_testreport
+#         exceltestreport('paybywallet',feedername = "")
+#         # print("\n\n",feedercheck['pass'])
+#         # print("\n\n",feedercheck['fail'])
+#         if status == 'Warn' or 'warn':
+#             message = YELLOW+"SOME TEST CASES IN FEEDPAYBYWALLET FAILED \n  "+CRESET +message
+#         elif status == True:
+#             message = GREEN+"ALL FEEDPAYBYWALLET TEST CASES PASSED \n  "+CRESET +message
+#         elif status == False:
+#             message = RED+"ALL FEEDPAYBYWALLET TEST CASES FAIlED \n  "+CRESET +message
             
-        testcasereport(test_name1,status,message )
-        return finaltr
+#         testcasereport(test_name1,status,message )
+#         return finaltr
