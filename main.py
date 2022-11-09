@@ -59,6 +59,11 @@ try:
             print("--fun","removes unwanted surprises")
             print("--force","forcefully tries to success")
             print("--feederhtmloutput : for html output\n","--feederexceloutput: for exceloutput","testreports :for both format output")
+            print("accepts expected login flows : 'changemobile','shufti','passport','firsttime' ")
+            print("\tchangemobile : changes mobile number if there is already a mobile registered with new one,else selects old one")
+            print("\tshufti : expects shufti flow")
+            print("\tpassport : logs in with passport if the flow reaches there")
+            print("\tfirsttime : flags the current user as firsttime,for various checks(may have incomplete )")
             print(" , no screenshot etc")
             no_run = True
         elif currentArgument in ("-n", "--no-reset"):

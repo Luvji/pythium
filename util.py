@@ -132,14 +132,17 @@ def save_screenshot(d, test_name):
         print( BLACKONRED+"\n\n"+middlespace+"seems like app crashed\n\n"+CRESET)
     
     scname = os.path.join(path3,current_time+test_name)
+    print(BLACKONWHITE)
     p(scname)
     path =scname+".png"
     path_II = scname+"_II.png"
     d.save_screenshot(path)
+    print(BLACKONRED)
     p("screenshot taken")
     d.get_screenshot_as_file(path_II)
     # screenshotBase64.save(r"C:\Users\Administrator\Desktop\python class\Output\2022-08-04\screenshots\testfunction222.png")
-    p("second screen shot")
+    p("second screen shot taken")
+    print(CRESET)
 
 def testcasereport(testname,status,msg = "No message provided"):
     msg = "Message : "+str(msg)
@@ -364,7 +367,7 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
                 return False                         
 # end wait_until_activity    
     
-def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5,minimal = False):
+def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5,minimal = False,wait =  0):
     '''
     only returns bool if condition is not string check .
     used to check and wait for if a text value of a id/xpath has changed.
@@ -380,7 +383,12 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5
                 sec = maximum wait time , iterate = frequency.
     '''
     try:
-        d.implicitly_wait(3)
+        if wait == 0:
+            d.implicitly_wait(3)
+            print("wait set to 3 seconds as default")
+        else:
+            print("wait time passed and set to ",wait)
+        
         print("waiting for ",locatorstring,condition,checker)
         if minimal:
             counter = 0

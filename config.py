@@ -54,14 +54,16 @@ parent_dir = os.getcwd()
 # loggeduserpin = '123321'
 # loggedemail = 'test@example.net'
 
-loggedcpr = '921851389'
-loggedmobile = '39932689'
-loggeddob = ['1988-09-27']
-loggedname = 'Courtneyer'
-loggedpassport = 'fPSh38615'
+loggedcpr = '840160660'
+loggedmobile = '34104500'
+loggeddob = ['20-Jan-1984']
+loggedname = 'ROGER'
+loggedpassport = ''
 loggedotp = '111111'
 loggeduserpin = '123321'
-loggedemail = 'test@example.net'
+loggedemail = 'tes1t@example.net'
+expectedloginflow = ['shufti',]
+
 
 # Courtney	Bowen	Santos	MALE	921851388	10/10/2027	39932689	veronicajohnson@example.org	Lake Matthew	1988-09-27	Moldova	Mxah84125	12/16/2035	home	jESG22	j11	Xz041	9627	english	CPR	Product designer
 
@@ -157,7 +159,12 @@ outputtime = str(datetime.now().strftime("%H-%M-%S"))
 # path to create excel output
 outputexcelpath = path2
 # ['changemobile','shufti','passport','firsttime']
-expectedloginflow = ['changemobile','shufti','passport','firsttime']
+try:
+    if expectedloginflow: 
+        print('expectedloginflow is ',expectedloginflow)   
+except NameError:
+    # expectedloginflow = ['changemobile','shufti','passport','firsttime']
+    expectedloginflow = []
 sessionlogfile =os.path.join(path2,"log", outputtime+'_log.txt')    
 testlogfile = os.path.join(path2,"log", outputtime+'Teststatus_log.txt')
 

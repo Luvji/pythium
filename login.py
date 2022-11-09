@@ -456,6 +456,7 @@ def register_with_cpr(self):
                     testflow = testflow + "initiated"
                     print("shufti is expected as login flow")
                     tr,status,message =shufti_initiation(self)
+                    p('shufti tr: ',tr,'\nshufti status: ',status,'\nshufti response message',message)
 #bdo check happening here
                     print('checking for bdo screen visibility') #id	@id/txtLabelAlmostHere
                     bdocheck = wait_until(d,'txtLabelAlmostHere',visible,sec = 25)
@@ -495,11 +496,11 @@ def register_with_cpr(self):
             else:
                 
                 if 'shufti' in expectedloginflow:
-                    print(RED+ "\n\t\tshufti flow expected,but flow didnt reached shufti. check your login user data. this might be an issue"+CRESET)
+                    print(YELLOW+ "\n\t\tshufti flow expected,but flow didnt reached shufti. check your login user data and expected login flow. this might be an issue"+CRESET)
                 
                 loggedpersonname = d.find_element(By.ID,"txtPersonName").text
                 testflow = testflow + ">dashboard"
-                tr = checkassert(d,loggedpersonname ,"==",loggedname,"checking logged name is :"+loggedname+"?")
+                tr = checkassert(d,loggedpersonname ,"contains",loggedname,"checking logged name is :"+loggedname+"?")
                 if tr == True:
                     print("updating wallet balance")
                     walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
@@ -546,10 +547,11 @@ def register_with_cpr(self):
                 print("it is not expected to be in Dashboard as the test already failed")
         else:
             if tr:
-                message = message + " and Dashboard activity Reach confirmed"
+                message = message + " and Dashboard activity not Reach confirmed"
             else:
                 message = 'the activity is not expected to reach in Dashboard as the test already failed' + " But the Activity UNEXPECTEDLY reached Dashboard "
-           
+                print(YELLOW+"check and ensure expected login flow is correct..!!!"+CRESET)
+
         print(message)
         
     except Exception as e:
@@ -617,7 +619,7 @@ def signinwithpin(self,minimal = False,logged = None):
                 # id	@id/txtPersonName
                 print("checking for current dashboard activity visibility is ",d.current_activity," : ",d.current_activity == dashboardactivity)
                 loggedpersonname = d.find_element(By.ID,"txtPersonName").text
-                tr = checkassert(d,loggedpersonname ,"==",loggedname,"checking logged name in dashboard is :"+loggedname+"?")
+                tr = checkassert(d,loggedpersonname ,"contains",loggedname,"checking logged name in dashboard is :"+loggedname+"?")
                 if tr == True:
                     print("updating wallet balance")
                     walletbal = d.find_element(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtAmtAvailBal").text
@@ -963,9 +965,9 @@ def shufti_initiation(self,minimal = True):
                 
                 yes_continue = driver.find_element(By.XPATH,"//android.widget.Button[@text = 'Yes, Continue']")
                 yes_continue.click()
-                print("clicked yes,continue to uplaod face")
+                print("clicked yes,continue to upload face")
                 
-                wait_until(d,"//android.widget.TextView[@text = 'Document Verification']",'visible')
+                wait_until(d,"//android.widget.TextView[@text = 'Document Verification']",'visible',wait=60)
                 doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
                 
                 print("checking if reached document verification ")
@@ -980,6 +982,7 @@ def shufti_initiation(self,minimal = True):
                 # wait_until(d,"//android.widget.TextView[@text = 'Upload a photo of your entire face']",'visible')
                 # //android.widget.RelativeLayout[1]/android.widget.TextView[@text = 'Document Verification']
                 print("checking if reached document verification ")
+                wait_until(d,"//android.widget.TextView[@text = 'Document Verification']",'visible',wait=60)
                 
                 doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
                 
@@ -1003,6 +1006,7 @@ def shufti_initiation(self,minimal = True):
                 print("clicked yes,continue to upload id_front")
                 
                 print("checking if reached document verification ")
+                wait_until(d,"//android.widget.TextView[@text = 'Document Verification']",'visible',wait=60)
                 
                 doc_verification = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Document Verification']")
                 
@@ -1025,14 +1029,14 @@ def shufti_initiation(self,minimal = True):
                 print("checking for shufti progress")
                 # wait_until()
                 wait_until(d,"//android.widget.TextView[@text = 'Verifying your Identity']",'not visible')
-                wait_until(d,"//android.widget.TextView[@text = 'Please Wait...']",'not visible')
+                wait_until(d,"//android.widget.TextView[@text = 'Please Wait...']",'not visible',sec=60)
                 
                 # com.bfccirrus.bfcpayments.mobile:id/main_tv
-                wait_until(d,'com.bfccirrus.bfcpayments.mobile:id/main_tv','visible')
+                wait_until(d,'com.bfccirrus.bfcpayments.mobile:id/main_tv','visible',wait=60)
                 # driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Verified']")
                 verifiedtext = driver.find_element(By.ID,'com.bfccirrus.bfcpayments.mobile:id/main_tv')
                 if checkassert(d,verifiedtext.text,'==','Verified','check if verified in response screen'):
-                    print("shufti porcess success")
+                    print("shufti process success")
                     identityverified = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Your identity has been Verified']")
                      
                     tr = checkassert(d,identityverified,'visible',assertname='checking for text -"Your identity has been Verified"-present?')
@@ -1069,6 +1073,7 @@ def shufti_initiation(self,minimal = True):
         status = 'Fail'
         message = e
     finally:
+        p('\tshufti test returned: ',tr,',shufti test status: ',status,',shufti response message',message)
         return tr,status,message
     
 # # a feeder function to feed multiple test case data - INCOMPLETE - ON HOLD
@@ -1315,7 +1320,7 @@ def feed_signin(self,logged ):
             else:
                 loggedpersonname = d.find_element(By.ID,"txtPersonName").text
                 testflow = testflow + ">dashboard"
-                tr = checkassert(d,loggedpersonname ,"==",loggedname,"checking logged name is :"+loggedname+"?")
+                tr = checkassert(d,loggedpersonname ,"contains",loggedname,"checking logged name is :"+loggedname+"?")
                 if tr == True:
                     status = "PASS"
                 else:
@@ -1353,10 +1358,10 @@ def feed_signin(self,logged ):
                 print("it is not expected to be in Dashboard as the test already failed")
         else:
             if tr:
-                message = message + " and Dashboard activity Reach confirmed"
+                message = message + " and Dashboard activity not Reach confirmed"
             else:
                 message = 'the activity is not expected to reach in Dashboard as the test already failed' + " But the Activity UNEXPECTEDLY reached Dashboard "
-           
+                print(YELLOW+"check and ensure expected login flow is correct..!!!"+CRESET)
         print(message)
         
     except Exception as e:
