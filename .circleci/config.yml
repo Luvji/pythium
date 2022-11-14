@@ -20,7 +20,9 @@ jobs:
     steps:
       - run:
           name: install npm
-          command: sudo apt-get install npm
+          command: |
+            sudo apt update
+            sudo apt-get install npm
       - run:
           name: Install appium server
           command: |
