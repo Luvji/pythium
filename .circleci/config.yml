@@ -19,6 +19,9 @@ jobs:
       - image: cimg/python:3.10.2
     steps:
       - run:
+          name: install npm
+          command: sudo apt-get install npm
+      - run:
           name: Install appium server
           command: |
             sudo npm update -g
