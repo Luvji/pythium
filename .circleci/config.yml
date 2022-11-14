@@ -37,6 +37,7 @@ jobs:
       #     name: Run tests
       #     # This assumes pytest is installed via the install-package step above
       #     command: py main.py 
+      - run: pip install -r requirements.txt
       - run: python ./main.py
 
 # Invoke jobs via workflows
