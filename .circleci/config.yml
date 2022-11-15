@@ -48,12 +48,12 @@ commands:
       - run:
           working_directory: .
           name: Download Fastlane dependencies
-          command: bundle install --path ./vendor/bundle
-      - save_cache:
-          name: Save Fastlane cache
-          key: v1-gems-{{ checksum "Gemfile.lock" }}-{{ arch }}
-          paths:
-            - ./vendor/bundle
+          command: bundle config set --local path './vendor/bundle'
+      # - save_cache:
+      #     name: Save Fastlane cache
+      #     key: v1-gems-{{ checksum "Gemfile.lock" }}-{{ arch }}
+      #     paths:
+      #       - ./vendor/bundle
 
   # pods-dependencies:
   #   description: "Get cocoapods dependencies"
