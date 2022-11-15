@@ -271,7 +271,9 @@ workflows:
   sample workflow:
     jobs:
     - android-emulator-setup
-    - install-appium-server
+    - install-appium-server:
+        requires:
+          - android-emulator-setup
     - start pythium:
         requires:
           - install-appium-server
