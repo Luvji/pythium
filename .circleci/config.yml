@@ -55,22 +55,22 @@ commands:
           paths:
             - ./vendor/bundle
 
-  pods-dependencies:
-    description: "Get cocoapods dependencies"
-    steps:
-      - restore_cache:
-          name: Restore cocoapods specs and pods
-          key: v1-cocoapods-{{ checksum "./ios/Podfile.lock" }}-{{ arch }}
-      - run:
-          name: Getting cocoapods dependencies
-          working_directory: ./ios
-          command: bundle exec pod install --deployment
-      - save_cache:
-          name: Save cocoapods specs and pods cache
-          key: v1-cocoapods-{{ checksum "./ios/Podfile.lock" }}-{{ arch }}
-          paths:
-            - ./ios/Pods
-            - ~/.cocoapods
+  # pods-dependencies:
+  #   description: "Get cocoapods dependencies"
+  #   steps:
+  #     - restore_cache:
+  #         name: Restore cocoapods specs and pods
+  #         key: v1-cocoapods-{{ checksum "./ios/Podfile.lock" }}-{{ arch }}
+  #     - run:
+  #         name: Getting cocoapods dependencies
+  #         working_directory: ./ios
+  #         command: bundle exec pod install --deployment
+  #     - save_cache:
+  #         name: Save cocoapods specs and pods cache
+  #         key: v1-cocoapods-{{ checksum "./ios/Podfile.lock" }}-{{ arch }}
+  #         paths:
+  #           - ./ios/Pods
+  #           - ~/.cocoapods
 
   gradle-dependencies:
     description: "Get Gradle dependencies"
@@ -125,14 +125,14 @@ commands:
           name: "Install watchman"
           command: |
             HOMEBREW_NO_AUTO_UPDATE=1 brew install watchman
-  simulator-dependencies:
-    description: "Install iOS simulator dependencies"
-    steps:
-      - run:
-          name: "Install applesimutils"
-          command: |
-            HOMEBREW_NO_AUTO_UPDATE=1 brew tap wix/brew
-            HOMEBREW_NO_AUTO_UPDATE=1 brew install applesimutils
+  # simulator-dependencies:
+  #   description: "Install iOS simulator dependencies"
+  #   steps:
+  #     - run:
+  #         name: "Install applesimutils"
+  #         command: |
+  #           HOMEBREW_NO_AUTO_UPDATE=1 brew tap wix/brew
+  #           HOMEBREW_NO_AUTO_UPDATE=1 brew install applesimutils
   create-launch-android-emulator:
     description: "create and launch android emulators"
     steps:
@@ -175,8 +175,8 @@ jobs:
 ############################
 
   android-emulator-setup:
-    macos:
-      xcode: 11.3.1
+    # macos:
+    #   xcode: 11.3.1
     steps:
       - attach_workspace:
           at: .
