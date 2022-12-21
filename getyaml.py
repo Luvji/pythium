@@ -25,7 +25,7 @@ def getyaml(yamlpath):
                 break
             keys.add(key)
         else:
-            data = {}  # type: Dict[Any, Any]
+            data = {}  #### type: Dict[Any, Any]
             yield data
             value = self.construct_mapping(node)
             data.update(value)

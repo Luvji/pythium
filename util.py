@@ -141,7 +141,7 @@ def save_screenshot(d, test_name):
     p("screenshot taken")
     d.get_screenshot_as_file(path_II)
     # screenshotBase64.save(r"C:\Users\Administrator\Desktop\python class\Output\2022-08-04\screenshots\testfunction222.png")
-    p("second screen shot taken")
+    p("second screen shot taken",'\r')
     print(CRESET)
 
 def testcasereport(testname,status,msg = "No message provided"):
@@ -337,7 +337,8 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
     iterate = frequency
     '''
     curractivity = d.current_activity
-    p("current ACTIVITY when wait_until-activity called ",curractivity)
+    print("waiting for activity : ",activityname)
+    p("\tcurrent ACTIVITY when wait_until-activity called ",curractivity)
     counter = 0
     if (condition == "visible" and activityname != ""):
         while (curractivity != activityname and counter<sec ):
@@ -347,10 +348,10 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
 
         else:
             if (curractivity == activityname):
-                p("activity: "+activityname+" found waited for :"+str(counter)+" seconds")
+                p("\tactivity: "+activityname+" found waited for :"+str(counter)+" seconds")
                 return True
             else:
-                p(YELLOW+"activity: "+activityname+" not found waited for :"+str(counter)+" seconds. curractivity is "+RED+curractivity+CRESET)
+                p(YELLOW+"\tactivity: "+activityname+" not found waited for :"+str(counter)+" seconds. curractivity is "+RED+curractivity+CRESET)
                 return False
     elif (condition == "notvisible" and activityname != ""):
         while (curractivity == activityname and counter<sec ):
@@ -360,10 +361,10 @@ def wait_until_activity(d,activityname,condition,sec = 15, iterate = .5):
 
         else:
             if (curractivity != activityname):
-                p(activityname+"not visible."+curractivity+" is current activity.took"+str(counter)+" seconds")
+                p(activityname+"\tnot visible."+curractivity+" is current activity.took"+str(counter)+" seconds")
                 return True
             else:
-                p(activityname+"still visible.that means"+curractivity+" is current activity.took"+str(counter)+" seconds")
+                p("\t"+activityname+"still visible.that means"+curractivity+" is current activity.took"+str(counter)+" seconds")
                 return False                         
 # end wait_until_activity    
     
@@ -506,7 +507,7 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5
                         return False
                         
             elif(condition == "visible" and locatorstring.startswith("//")):
-                p("checking for element visibility")
+                p("checking for element visibility of locator :",locatorstring )
                 while (len(d.find_elements_by_xpath(locatorstring)) == 0 and counter<sec):
                     counter = counter + iterate
                     sleep(iterate)
@@ -519,12 +520,13 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5
                         return True
             
             elif(condition == "visible"):
-                p("checking for element visibility by id")
+                p("\tchecking for element visibility by id of",locatorstring)
                 while (len(d.find_elements_by_id(locatorstring)) == 0 and counter<sec):
                     counter = counter + iterate
                     sleep(iterate)
                 else:
                     if counter>=sec :
+                        
                         p("\telement with ID/xpath/ '"+locatorstring+ "' NOT found. waited for :"+str(counter)+" seconds")
                         return False
                     else:
@@ -535,7 +537,10 @@ def wait_until(d,locatorstring,condition ="==",checker ="",sec = 7, iterate = .5
                 # p("if you are a developer please create one now")
             elif(condition == "not visible" and locatorstring.startswith("//")):
                 # p("checking for element visibility")
+                print('checking for:',locatorstring)
                 while (len(d.find_elements_by_xpath(locatorstring)) > 0 and counter<sec):
+                    print("element drawn but is it displayed? ",d.find_elements_by_xpath(locatorstring)[0].is_displayed())
+                    print("\twait until bug check:::len(d.find_elements_by_xpath(locatorstring)):",len(d.find_elements_by_xpath(locatorstring)) > 0,' length : ',len(d.find_elements_by_xpath(locatorstring)))
                     counter = counter + iterate
                     sleep(iterate)
                 else:
@@ -999,7 +1004,7 @@ def checkassert(d,element,condition = "",checker="",assertname = "assert"):
                 return False
         elif(type(element) is bool or type(checker) is bool):
             if (type(element) is bool and type(checker) is bool):
-                print("both are boolean,checking for assert")
+                print("\t\tboth are boolean,checking for assert")
             else:
                 elemstr,checker = (element,checker) if type(checker) is bool else (checker,element)
                 # if type(elemstr)is not None and len(elemstr) > 60:

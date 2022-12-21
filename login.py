@@ -1,22 +1,107 @@
 from customclasses import failed, splashloadtooklong
 from util import *
 from config import *
+from dateutil import parser
+
 # from util import wait_until_activity
 from time import sleep
 import traceback
 from selenium.webdriver.common.by import By
 
-#enter date - as a function module
+
+def check_bdo(self,test_name = outputtime+'_BDO_CHECKFAIL'):
+#bdo check happening here
+    try:
+        tr = False
+        message = 'unexpected error occured when checking BDO screen'
+        status = 'FAIL'
+        d = driver = self.driver
+        print('checking for bdo screen visibility,wait set to 10 sec') #id	@id/txtLabelAlmostHere
+        sleep(2)
+        if d.current_activity == dashboardactivity:
+            print("the screen reached dsahboard,not the BDO , user is not firstime")
+            if 'firsttime' in expectedloginflow:
+                print(YELLOW+"\tuser is expected as first timer and but BDO screen not found and reached dashboard"+CRESET)
+                if not force:
+                    print("\n\tforce is not enabled , the test will be now stop executing")
+                    message = 'user is expected as first timer and expected a BDO screen,but BDO screen not found,it reached dashboard instead'
+                    status = 'FAIL'
+                    tr = False
+                    # bdocheck = false this is not needed as expected test to fail
+                    raise failed('login with shufti',message)
+                else:
+                    bdocheck = False #no need to check bdo since this is dashboard
+            else: # user is not expected first time , bdo not required
+                bdocheck = False
+                print("\tBDO screen not found, but this is intended as the user is not first timer! please check and ensure user login flow for more details")
+        else:    
+            bdocheck = wait_until(d,'txtLabelAlmostHere',visible,sec = 10)
+        if bdocheck:
+            # print(loggedemail)
+            if 'firsttime' in expectedloginflow:
+                print("user is expected as first timer and BDO check is intended")
+            else:
+                print("\tBDO screen found, but this is not intended as the user is not first timer!check user login flow")
+            print("bdo screen visible , user is confirmed to be new") #id	@id/etEmailId
+            global loggedemail
+            loggedemail = 'test@example.net' if loggedemail == None or '' else loggedemail
+            # d.find_element(By.ID,'etEmailId').send_keys(loggedemail)
+            print("selecting default for now, select from list given for test coverage increase")
+            print("clicking on tnc check box on BDO screen")
+            d.find_element(By.ID,"checkBoxTermsAndConditions").click()
+            sleep(1)
+            #id	@id/btnDone
+            donebutton  = d.find_element(By.ID,'btnDone') 
+            donebuttonstatus = donebutton.get_attribute('enabled')
+            #if donebuttonstatus == false ,means button is enabled and clickable
+            if checkassert(d,donebuttonstatus,'==','true',"done button enabled for bdo screen check"):
+                donebutton.click()
+                check_progressbar(d)
+                print("BDO process is complete ,checking for dashboard now.")
+            else:
+                print("Done button is disabled, check all fields are filled and try again ")
+                tr ='warn'
+                status = "FAIL"
+                message = 'Shufti verified successfully but BDO survey screen could not be completed'
+                save_screenshot(d,test_name)
+        else:
+            print("bdo screen not found! checking if the the user is firsttime")
+            if 'firsttime' in expectedloginflow:
+                print(YELLOW+"\tthe user is expected to be first time but BDO screen not found. it is an error if not intended"+CRESET)
+                message = "BDO screen not found , and it is expected.check user login flow"
+                tr ='warn'
+                status = 'warn'
+            else:
+                print("bdo screen not visible and not expected,")
+                tr =True
+                status = 'PASS'
+                message = 'Bdo screen not found, check for dashboard now!'
+                
+            
+    except Exception as e:
+        save_screenshot(d,outputtime+'bdo check@')
+        message = e
+        status = 'FAIL'
+        tr = False
+    finally:
+        print("\tBDO check status:",status,"message :",message)
+        return tr,message
+
+ #enter date - as a function module
 def enterdate(self,dateselected):
     # try:
         self.driver.implicitly_wait(3)
 
         if dateselected not in  ['',None]:
             global lastbday, lastbmonth,lastbyear
+            format = "%Y-%m-%d" # The format
+            selecteddate = parser.parse(dateselected)
+            dateselected = selecteddate.strftime(format)
             
             d = driver = self.driver
 
             dob = dateselected.rsplit("-") #'2009-03-20' => ['2009', '03', '20']
+                
             bday =  dob[2]    #format dd
             bmonth =  dob[1]  #format mm
             byear =  dob[0] #format yyyy
@@ -263,6 +348,7 @@ def register_with_cpr(self):
     status = "FAIL"
     d = driver = self.driver
     tr =False
+    
 
     try:
         print("current activity at start = ",d.current_activity)
@@ -284,8 +370,8 @@ def register_with_cpr(self):
                 status = "FAIL"
                 # message = "not reached the dashboard , call_check dashboard here"
         elif len(d.find_elements(By.ID,"txtHeading")) > 0 and not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0: #d.find_element_by_id("txtWelcomeDialog").is_displayed():
-            print(len(d.find_elements(By.ID,"txtHeading")) > 0)
-            print(not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
+            print('checking if Heading is visible - ',len(d.find_elements(By.ID,"txtHeading")) > 0)
+            print('checking if welcome dialogue is not visible - ',not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
             print("getting on the signupflow")
             signupwelcometext = d.find_element(By.ID,"txtHeading").text
             print("checking if text ",signupwelcometext," is actually intended welcome text")
@@ -346,7 +432,8 @@ def register_with_cpr(self):
 
                 # print("radio button checked?",rbtn1.get_attribute("checked"))
                 # print("radio button is selected with the mobile number text '+973 "+formattednumber+"'")
-                if 'changemobile' in expectedloginflow:
+                # if 'changemobile' in expectedloginflow:
+                if checkassert(d,'changemobile' in expectedloginflow ,'==',True, "change number when another regsd number flow check"):
                     testflow = testflow + ">change mobile"
                     rbtn1 = d.find_element_by_xpath("//android.widget.RadioButton[@text = '+973 "+loggedmobile+"']")
                     rbtn1.click()
@@ -357,7 +444,7 @@ def register_with_cpr(self):
                     print("moile number change flow not intended,selecting the already registered number")  
             else:
                 print("no other mobile number for is registered with this account")
-                if not checkassert(d,'changemobile' in expectedloginflow ,'==',True, "change number flow check"):
+                if not checkassert(d,'changemobile' in expectedloginflow ,'==',False, "change number flow check"):
                     print("expected flow cannot be executed , proceeding with normal flow.")
                 else:
                     print("change number flow is not expected")
@@ -383,7 +470,7 @@ def register_with_cpr(self):
                 
             # id	@id/edtOtp
             d.find_element(By.ID,"edtOtp").send_keys(loggedotp)
-            print("OTP entered ")
+            print("OTP entered,checking for snackbar ")
             d.find_element(By.ID,"btnSubmit").click()
             
             snackbarfound,snackbartext =  check_snackbarv2(d)
@@ -398,6 +485,8 @@ def register_with_cpr(self):
 # if user is onboarding for first time , there will be no date check,it will go to pin and then shufti
             lblverifydates = d.find_elements(By.ID,"txtVerifyDobLabel")
             if len(lblverifydates)>0:
+                #if the user is first time login , then it will not go to dob
+                print("TO_DO: fine tune this check later. 'firstime' flag should not control any flow.")
                 if 'firsttime' in expectedloginflow:
                     print(YELLOW,"\tDOB verification is not intended for first time onboarding users, this is an error if not intended",CRESET)
                 else:
@@ -457,39 +546,27 @@ def register_with_cpr(self):
                     print("shufti is expected as login flow")
                     tr,status,message =shufti_initiation(self)
                     p('shufti tr: ',tr,'\nshufti status: ',status,'\nshufti response message',message)
-#bdo check happening here
-                    print('checking for bdo screen visibility') #id	@id/txtLabelAlmostHere
-                    bdocheck = wait_until(d,'txtLabelAlmostHere',visible,sec = 25)
-                    if bdocheck:
-                        # print(loggedemail)
-                        print("bdo screen visible , user is confirmed to be new") #id	@id/etEmailId
-                        global loggedemail
-                        loggedemail = 'test@example.net' if loggedemail == None or '' else loggedemail
-                        # d.find_element(By.ID,'etEmailId').send_keys(loggedemail)
-                        print("selecting default for now, select from list given for test coverage increase")
-                        print("clicking on tnc check box on BDO screen")
-                        d.find_element(By.ID,"checkBoxTermsAndConditions").click()
-                        sleep(1)
-                        #id	@id/btnDone
-                        donebutton  = d.find_element(By.ID,'btnDone') 
-                        donebuttonstatus = donebutton.get_attribute('enabled')
-                        #if donebuttonstatus == false ,means button is enabled and clickable
-                        if checkassert(d,donebuttonstatus,'==','true',"done button enabled for bdo screen check"):
-                            donebutton.click()
-                            check_progressbar(d)
-                            print("BDO process is complete ,checking for dashboard now.")
-                        else:
-                            print("Done button is disabled, check all fields are filled and try again ")
-                            tr ='warn'
-                            status = "FAILED"
-                            message = 'Shufti verified successfully but BDO survey screen could not be completed'
-                            save_screenshot(d,test_name)
+                    if tr:
+                        check_bdo(self,test_name)
+                    else:
+                        print(RED+"\n\tshufti flow failed ,exiting test now"+CRESET)
                 elif force :
                     print(RED+ "\n\t\tthis went to shufti , which was not intended.but with force enabled test continues with shufti."+CRESET)
                     testflow = testflow + "forcefully initiated"
                     test_name = 'signup_with_cpr_with_known_number_with_force_shufti'
                     tr,status,message = shufti_initiation(self)
                     print("shufti completed ,tr,status,message are  " ,tr,status,message)
+                    if tr:
+                        bdores,bdomessage = check_bdo(self,test_name)
+                        if not bdores:
+                            print("shufti run passed,but test failed at BDO screen")
+                            tr = 'warn'
+                            message = "shufti run passed,test failed at BDO screen with message : "+bdomessage
+                        else:
+                            print('shufti and bdo test successfully completed' )
+                    else:
+                        print(RED+"shufti flow failed with force, exiting test now"+CRESET)
+                    
                 else:
                     testflow = testflow + "unexpected"
                     print("this is not expected to be in shufti,and shufti flow is not initiatiating. test might fail now")
@@ -522,11 +599,17 @@ def register_with_cpr(self):
             print('len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0',len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
             
         print("checking current activity is dashboard ,if not the flow might have changed to shufti")
-        if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
+        # if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
+        if not wait_until_activity(d,dashboardactivity,visible):
+            #when dashboard not reached or visible
+            print("activity not in dashboard !- current activity is ",d.current_activity )
             if tr:
                 message = message + " , But also the activity dashboard not reached"
                 tr = "warn"
                 checkshufti = len(d.find_elements(By.ID,'txtVerifyDobLabel') )>0 and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
+                if d.currentactivity ==  'com.bfc.bfcpayments.modules.onboarding_journey.OnBoardingMainActivity':
+                    print("\tthe screen is not exited from login flow., find screenshot")
+                    save_screenshot(d,outputtime+'reach_dashboard_fail')
                 # checkshufti = len(d.find_elements(By.ID,'txtVerifyDobLabel'))>0 and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
                 if checkshufti:
                     print("shufti procedure needed to be proccessed\n")
@@ -537,9 +620,19 @@ def register_with_cpr(self):
                         print('shufti test result is ',tr)
                         print('shufti test status is ',status)
                         print('shufti test message is ',message)
+                        if tr:
+                            bdores,bdomessage = check_bdo(self,test_name)
+                            if not bdores:
+                                print("shufti passed,test failed at BDO screen")
+                                tr = 'warn'
+                                message = "shufti passed,test failed at BDO screen with message : "+bdomessage
+                            else:
+                                print('test successfully completed' )
+                        else:
+                            print('\n'+RED+"\tforce rerun of shufti flow failed: exiting now"+CRESET)
                     # if tr:
                     else:
-                        print("shufti procedure will not be initiated")
+                        print("shufti procedure will not be initiated,because force is not enabled")
                         
                 else:
                     print("consent for verification not found. ")
@@ -547,13 +640,15 @@ def register_with_cpr(self):
                 print("it is not expected to be in Dashboard as the test already failed")
         else:
             if tr:
-                message = message + " and Dashboard activity not Reach confirmed"
+                message = message + " and Dashboard activity Reach confirmed"
             else:
+                print("this is tr,",tr)
                 message = 'the activity is not expected to reach in Dashboard as the test already failed' + " But the Activity UNEXPECTEDLY reached Dashboard "
                 print(YELLOW+"check and ensure expected login flow is correct..!!!"+CRESET)
 
-        print(message)
-        
+        print('message :',message)
+        print('check if multiple testreportcase is happening when shufti forcefully initiated')
+        print('tr : ',tr,'stastus',status)
     except Exception as e:
         # self.fail("Encountered an unexpected exception.test failed in "+test_name)
         print(e)
@@ -567,6 +662,7 @@ def register_with_cpr(self):
     
     finally:
         #may need to check the crash
+        print("testflow:",testflow)
         testcasereport(test_name,status,message)
         return tr
      
@@ -581,6 +677,7 @@ def signinwithpin(self,minimal = False,logged = None):
     
     if logged == None : #if not feeder take the variable from global ie. from config.py
         global loggedname
+        global force
     if logged != None and len(logged)>0: #if this is of a feeder there will be a logged
         loggedcpr = logged['cpr']
         loggedmobile = logged['mobile']
@@ -1029,16 +1126,14 @@ def shufti_initiation(self,minimal = True):
                 print("checking for shufti progress")
                 # wait_until()
                 wait_until(d,"//android.widget.TextView[@text = 'Verifying your Identity']",'not visible')
-                wait_until(d,"//android.widget.TextView[@text = 'Please Wait...']",'not visible',sec=60)
-                
+                # wait_until(d,"//android.widget.TextView[@text = 'Please Wait...']",'not visible',iterate=1,sec = 100,wait=1)
                 # com.bfccirrus.bfcpayments.mobile:id/main_tv
-                wait_until(d,'com.bfccirrus.bfcpayments.mobile:id/main_tv','visible',wait=60)
+                wait_until(d,'com.bfccirrus.bfcpayments.mobile:id/main_tv','visible',sec=100)
                 # driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Verified']")
                 verifiedtext = driver.find_element(By.ID,'com.bfccirrus.bfcpayments.mobile:id/main_tv')
                 if checkassert(d,verifiedtext.text,'==','Verified','check if verified in response screen'):
                     print("shufti process success")
                     identityverified = driver.find_element(By.XPATH,"//android.widget.TextView[@text = 'Your identity has been Verified']")
-                     
                     tr = checkassert(d,identityverified,'visible',assertname='checking for text -"Your identity has been Verified"-present?')
                     (status,message) = ("PASS","shufti verification completed successfully") if tr else ("FAIL","shufti verification failed")
                     print("clicking proceed to complete process")
@@ -1048,6 +1143,33 @@ def shufti_initiation(self,minimal = True):
                     #or doing a shufti initiation again from clicking consent might do the work
                     driver.find_element(By.XPATH,
                                             "//android.widget.Button[@text = 'Proceed']").click()
+                    #bdo check happening here
+                    print('checking for bdo screen visibility') #id	@id/txtLabelAlmostHere
+                    bdocheck = wait_until(d,'txtLabelAlmostHere',visible,sec = 25)
+                    if bdocheck:
+                        # print(loggedemail)
+                        print("bdo screen visible , user is confirmed to be new") #id	@id/etEmailId
+                        global loggedemail
+                        loggedemail = 'test@example.net' if loggedemail == None or '' else loggedemail
+                        # d.find_element(By.ID,'etEmailId').send_keys(loggedemail)
+                        print("selecting default for now, select from list given for test coverage increase")
+                        print("clicking on tnc check box on BDO screen")
+                        d.find_element(By.ID,"checkBoxTermsAndConditions").click()
+                        sleep(1)
+                        #id	@id/btnDone
+                        donebutton  = d.find_element(By.ID,'btnDone') 
+                        donebuttonstatus = donebutton.get_attribute('enabled')
+                        #if donebuttonstatus == false ,means button is enabled and clickable
+                        if checkassert(d,donebuttonstatus,'==','true',"done button enabled for bdo screen check"):
+                            donebutton.click()
+                            check_progressbar(d)
+                            print("BDO process is complete ,checking for dashboard now.")
+                        else:
+                            print("Done button is disabled, check all fields are filled and try again ")
+                            tr ='warn'
+                            status = "FAILED"
+                            message = 'Shufti verified successfully but BDO survey screen could not be completed'
+                            save_screenshot(d,test_name)
                 else:
                     print("shufti response is ",verifiedtext.text)
                     verifiedsubtext = driver.find_element(By.ID,'com.bfccirrus.bfcpayments.mobile:id/secound_tv')
@@ -1068,14 +1190,18 @@ def shufti_initiation(self,minimal = True):
             
     except Exception as e:
         print(e)
+        traceback.print_exc()
         save_screenshot(d,'shufti_initiation_'+outputtime)
         tr = False
         status = 'Fail'
         message = e
     finally:
-        p('\tshufti test returned: ',tr,',shufti test status: ',status,',shufti response message',message)
+        p('\tshufti test will return: ',tr,',shufti test status: ',status,',shufti response message',message)
         return tr,status,message
     
+
+
+
 # # a feeder function to feed multiple test case data - INCOMPLETE - ON HOLD
 # def login_feeder(self,minimal = False):
 #     print("tis is login feeder")
@@ -1140,244 +1266,249 @@ def shufti_initiation(self,minimal = True):
 #                 print(e)
                 
 # re written attempt on feeder function to feed multiple test case data - INCOMPLETE - ON HOLD   
-def feed_signin(self,logged ):
+# def feed_signin(self,logged ):
     
-    loggedcpr = logged['cpr']
-    loggedmobile = logged['mobile']
-    expectedloginflow = logged['expectedloginflow'] if len(logged['expectedloginflow'])>0 else []
-    loggeddob = logged['dob']
-    force = False
-    loggedname = logged['name']
+#     loggedcpr = logged['cpr']
+#     loggedmobile = logged['mobile']
+#     expectedloginflow = logged['expectedloginflow'] if len(logged['expectedloginflow'])>0 else []
+#     loggeddob = logged['dob']
+#     force = False
+#     loggedname = logged['name']
     
     
-    test_name = 'signin feeder'
-    testflow = test_name
-    message = 'unexpected error occured in '+test_name
-    status = "FAIL"
-    d = driver = self.driver
-    tr =False
+#     test_name = 'signin feeder'
+#     testflow = test_name
+#     message = 'unexpected error occured in '+test_name
+#     status = "FAIL"
+#     d = driver = self.driver
+#     tr =False
 
-    try:
-        print("current activity at start = ",d.current_activity)
-        'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity'
-        splash_activity_check = wait_until_activity(d,'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity','notvisible',sec=30)
-        if not splash_activity_check:
-            message = "splash screen took too long time to complete loading"
-            raise splashloadtooklong
-        print("checking the entry gateway as signup or signin")
-        if not len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack"))>0:
-            print("signin flow")
-            testflow = testflow + ">sign in with pin"
+#     try:
+#         print("current activity at start = ",d.current_activity)
+#         'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity'
+#         splash_activity_check = wait_until_activity(d,'com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity','notvisible',sec=30)
+#         if not splash_activity_check:
+#             message = "splash screen took too long time to complete loading"
+#             raise splashloadtooklong
+#         print("checking the entry gateway as signup or signin")
+#         if not len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack"))>0:
+#             print("signin flow")
+#             testflow = testflow + ">sign in with pin"
 
-            tr,message = signinwithpin(self,minimal=True,logged=logged)
-            if tr == True:
-                status = "PASS"
-                # message = "sign in with pin success"
-            else:
-                status = "FAIL"
-                # message = "not reached the dashboard , call_check dashboard here"
-        elif len(d.find_elements(By.ID,"txtHeading")) > 0 and not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0: #d.find_element_by_id("txtWelcomeDialog").is_displayed():
-            print("getting on the signupflow")
-            signupwelcometext = d.find_element(By.ID,"txtHeading").text
-            if not checkassert(d,signupwelcometext ,"==","International money transfers at great rates","welcome text displayed?"):
-                raise splashloadtooklong 
+#             tr,message = signinwithpin(self,minimal=True,logged=logged)
+#             if tr == True:
+#                 status = "PASS"
+#                 # message = "sign in with pin success"
+#             else:
+#                 status = "FAIL"
+#                 # message = "not reached the dashboard , call_check dashboard here"
+#         elif len(d.find_elements(By.ID,"txtHeading")) > 0 and not len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0: #d.find_element_by_id("txtWelcomeDialog").is_displayed():
+#             print("getting on the signupflow")
+#             signupwelcometext = d.find_element(By.ID,"txtHeading").text
+#             if not checkassert(d,signupwelcometext ,"==","International money transfers at great rates","welcome text displayed?"):
+#                 raise splashloadtooklong 
             
-            print("clicking on the register button")
-            d.find_element(By.ID,"btnRegister").click()
+#             print("clicking on the register button")
+#             d.find_element(By.ID,"btnRegister").click()
             
-            entercprlabel = d.find_element(By.ID,"txtLabelEnterCpr").text
-            checkassert(d,entercprlabel ,"==","Enter your CPR number","enter CPR label displayed?")
+#             entercprlabel = d.find_element(By.ID,"txtLabelEnterCpr").text
+#             checkassert(d,entercprlabel ,"==","Enter your CPR number","enter CPR label displayed?")
             
-            entercpr = d.find_element(By.ID,"edtCPR")
-            entercpr.send_keys(loggedcpr)
-            print("entered cpr , ",loggedcpr)
+#             entercpr = d.find_element(By.ID,"edtCPR")
+#             entercpr.send_keys(loggedcpr)
+#             print("entered cpr , ",loggedcpr)
             
-            d.find_element(By.ID,"checkBoxTermsAndConditions").click()
+#             d.find_element(By.ID,"checkBoxTermsAndConditions").click()
             
-            d.find_element(By.ID,"btnSubmit").click()
-            # check_snackbarv2(d)
-            snackbarfound,snackbartext =  check_snackbarv2(d)
-            if snackbarfound:
-                print("\n",YELLOW,snackbartext,CRESET,"\n")
-                print(RED+"\n\tUNLOCK the user from cxportal to continue"+CRESET)
+#             d.find_element(By.ID,"btnSubmit").click()
+#             # check_snackbarv2(d)
+#             snackbarfound,snackbartext =  check_snackbarv2(d)
+#             if snackbarfound:
+#                 print("\n",YELLOW,snackbartext,CRESET,"\n")
+#                 print(RED+"\n\tUNLOCK the user from cxportal to continue"+CRESET)
                 
-                raise failed(test_name,"Alert :"+snackbartext)
-            print("proceed button clicked , reaching onto mobile number page:")
-            # check_and_waitforprogressbar(d,sec=2)
-            check_progressbar(d)
+#                 raise failed(test_name,"Alert :"+snackbartext)
+#             print("proceed button clicked , reaching onto mobile number page:")
+#             # check_and_waitforprogressbar(d,sec=2)
+#             check_progressbar(d)
 
-            lblentermobnum = d.find_element(By.ID,"txtLabelAlmostHere").text
-            checkassert(d,lblentermobnum ,"==","Enter your mobile number","enter mobile number label displayed?")
-            # loggedmobile = "33333333"
-            formattednumber = loggedmobile[0]+"****"+loggedmobile[5:8] #making it into format = 6****011
+#             lblentermobnum = d.find_element(By.ID,"txtLabelAlmostHere").text
+#             checkassert(d,lblentermobnum ,"==","Enter your mobile number","enter mobile number label displayed?")
+#             # loggedmobile = "33333333"
+#             formattednumber = loggedmobile[0]+"****"+loggedmobile[5:8] #making it into format = 6****011
             
             
-            print("entering mobile number , ",loggedmobile)
-            print(YELLOW+"\n\n\n changing mobilenumber to null for test , change it back to variable after development"+CRESET+"\n\n\n")
-            # id	@id/viewEditBg
-            if loggedmobile == "33333333":
-                d.find_element(By.ID,"editMobileNumber").send_keys('31336333')
-            else:  
-                d.find_element(By.ID,"editMobileNumber").send_keys(loggedmobile)
+#             print("entering mobile number , ",loggedmobile)
+#             print(YELLOW+"\n\n\n changing mobilenumber to null for test , change it back to variable after development"+CRESET+"\n\n\n")
+#             # id	@id/viewEditBg
+#             if loggedmobile == "33333333":
+#                 d.find_element(By.ID,"editMobileNumber").send_keys('31336333')
+#             else:  
+#                 d.find_element(By.ID,"editMobileNumber").send_keys(loggedmobile)
             
-            d.find_element(By.ID,"btnSubmit").click()
-            # id	@id/txtLabelAlmostHere id	@id/txtHeading
-            anothermobileregistered = False
-            try:
-                anothermobileregistered = d.find_element(By.ID,"txtHeading").is_displayed()
-            except NoSuchElementException as e:
-                print("the mobile number is as same as registered one")
-            if anothermobileregistered:
-                print("another mobile seems to be registered with this account,proceeding with that","+973 "+formattednumber)
-                # //android.widget.RadioButton[@text = '+973 3****369']
-                print(YELLOW+"\n\n\n\nthis is hardecoded in here, \n\n used changemobile in expectedloginflow \n\n"+CRESET)
-                # rbtn = d.find_element(By.XPATH,"//android.widget.RadioButton[@text = '+973 3****369']")
+#             d.find_element(By.ID,"btnSubmit").click()
+#             # id	@id/txtLabelAlmostHere id	@id/txtHeading
+#             anothermobileregistered = False
+#             try:
+#                 anothermobileregistered = d.find_element(By.ID,"txtHeading").is_displayed()
+#             except NoSuchElementException as e:
+#                 print("the mobile number is as same as registered one")
+#             if anothermobileregistered:
+#                 print("another mobile seems to be registered with this account,proceeding with that","+973 "+formattednumber)
+#                 # //android.widget.RadioButton[@text = '+973 3****369']
+#                 print(YELLOW+"\n\n\n\nthis is hardecoded in here, \n\n used changemobile in expectedloginflow \n\n"+CRESET)
+#                 # rbtn = d.find_element(By.XPATH,"//android.widget.RadioButton[@text = '+973 3****369']")
 
-                # print("radio button checked?",rbtn1.get_attribute("checked"))
-                # print("radio button is selected with the mobile number text '+973 "+formattednumber+"'")
-                if 'changemobile' in expectedloginflow:
-                    testflow = testflow + ">change mobile"
-                    rbtn1 = d.find_element_by_xpath("//android.widget.RadioButton[@text = '+973 "+loggedmobile+"']")
-                    rbtn1.click()
-                    formattednumber = loggedmobile
-                    print("clciking on another mobile")  
-                else:
-                    testflow = testflow + ">no mobile change"
-                    print("moile number flow not intended")  
-            else:
-                print("no other mobile number for is registered with this account")
-                if not checkassert(d,'changemobile' in expectedloginflow , "expected flow check"):
-                    print("expected flow cannot be executed , proceeding with normal flow.")
-            d.find_element_by_xpath("//android.widget.Button[@text = 'Proceed']").click()
-            check_progressbar(d) 
-            enterotplabel = d.find_element(By.ID,"txtLabelAlmostHere").text
-            if '****' in enterotplabel:
-                #adding a space for the sake of the test case. between 'to +9'
-                txt ="Enter the 6 digit OTP sent to   +973 "+formattednumber
-                print("this number has registered once")
-            else:
-                txt ="Enter the 6 digit OTP sent to   +973 "+loggedmobile
-                print("first time registering this number")
-            checkassert(d,enterotplabel ,"==",txt,"enter OTP label displayed?")
-            # id	@id/edtOtp
-            d.find_element(By.ID,"edtOtp").send_keys(loggedotp)
-            print("OTP entered ")
-            d.find_element(By.ID,"btnSubmit").click()
+#                 # print("radio button checked?",rbtn1.get_attribute("checked"))
+#                 # print("radio button is selected with the mobile number text '+973 "+formattednumber+"'")
+#                 if 'changemobile' in expectedloginflow:
+#                     testflow = testflow + ">change mobile"
+#                     rbtn1 = d.find_element_by_xpath("//android.widget.RadioButton[@text = '+973 "+loggedmobile+"']")
+#                     rbtn1.click()
+#                     formattednumber = loggedmobile
+#                     print("clciking on another mobile")  
+#                 else:
+#                     testflow = testflow + ">no mobile change"
+#                     print("moile number flow not intended")  
+#             else:
+#                 print("no other mobile number for is registered with this account")
+#                 if not checkassert(d,'changemobile' in expectedloginflow , "expected flow check"):
+#                     print("expected flow cannot be executed , proceeding with normal flow.")
+#             d.find_element_by_xpath("//android.widget.Button[@text = 'Proceed']").click()
+#             check_progressbar(d) 
+#             enterotplabel = d.find_element(By.ID,"txtLabelAlmostHere").text
+#             if '****' in enterotplabel:
+#                 #adding a space for the sake of the test case. between 'to +9'
+#                 txt ="Enter the 6 digit OTP sent to   +973 "+formattednumber
+#                 print("this number has registered once")
+#             else:
+#                 txt ="Enter the 6 digit OTP sent to   +973 "+loggedmobile
+#                 print("first time registering this number")
+#             checkassert(d,enterotplabel ,"==",txt,"enter OTP label displayed?")
+#             # id	@id/edtOtp
+#             d.find_element(By.ID,"edtOtp").send_keys(loggedotp)
+#             print("OTP entered,checking for snackbar ")
+#             d.find_element(By.ID,"btnSubmit").click()
             
-            snackbarfound,snackbartext =  check_snackbarv2(d)
-            if snackbarfound:
-                print("\n",YELLOW,snackbartext,CRESET,"\n")
-                # print(RED+"\n\tUNLOCK the user from cxportal to continue"+CRESET)
-                save_screenshot(d,test_name)
-                raise failed(test_name,"Alert :"+snackbartext)
+#             snackbarfound,snackbartext =  check_snackbarv2(d)
+#             if snackbarfound:
+#                 print("\n",YELLOW,snackbartext,CRESET,"\n")
+#                 # print(RED+"\n\tUNLOCK the user from cxportal to continue"+CRESET)
+#                 save_screenshot(d,test_name)
+#                 raise failed(test_name,"Alert :"+snackbartext)
                 
-            print("proceed button clicked , reaching onto mobile number page:")
-            # id	@id/txtVerifyDobLabel
-            lblverifydate = d.find_element(By.ID,"txtVerifyDobLabel").text
+#             print("otp success button click success , checking for dob page :")
+#             # id	@id/txtVerifyDobLabel
+#             lblverifydate = d.find_element(By.ID,"txtVerifyDobLabel").text
             
-            checkassert(d,lblverifydate ,"==","Verify date of birth","verify date page reached?")
+#             checkassert(d,lblverifydate ,"==","Verify date of birth","verify date page reached?")
 
-            # adding date as function
-            if isinstance(loggeddob, list):
-                testflow = testflow + ">multiple DOB"
-                for selecteddate in loggeddob:
-                    enterdate(self,selecteddate)
-            else:
-                testflow = testflow+ ">single DOB"
-                enterdate(self,loggeddob)
+#             # adding date as function
+#             if isinstance(loggeddob, list):
+#                 testflow = testflow + ">multiple DOB"
+#                 for selecteddate in loggeddob:
+#                     enterdate(self,selecteddate)
+#             else:
+#                 testflow = testflow+ ">single DOB"
+#                 enterdate(self,loggeddob)
              
             
-            check_and_hide_keyboard(d)
-            # id	@id/imgEmail txtLabelSetMpin
-            txtLabelSetMpin = d.find_element(By.ID,"txtLabelSetMpin").text
-            checkassert(d,txtLabelSetMpin ,"==","Set a PIN","Pin set page reached?")
+#             check_and_hide_keyboard(d)
+#             # id	@id/imgEmail txtLabelSetMpin
+#             txtLabelSetMpin = d.find_element(By.ID,"txtLabelSetMpin").text
+#             checkassert(d,txtLabelSetMpin ,"==","Set a PIN","Pin set page reached?")
             
-            #id	@id/edtPin  id	@id/edtConfirmPin
-            print("confirming pin")
-            d.find_element(By.ID,"edtPin").send_keys(loggeduserpin)
-            print("PIN entered ,confirming PIN now")
-            d.find_element(By.ID,"edtConfirmPin").send_keys(loggeduserpin)
-            print("pin entered is",loggeduserpin,"now clicking proceed")
-            # check_and_hide_keyboard(d)
-            check_progressbar(d)
-            # d.find_element(By.ID,"btnSubmit").click()
-            # id	@id/txtPersonName
-            print('checking for shufti screen')
-            if len(d.find_elements(By.ID,"txtPersonName"))== 0:
-                testflow = testflow + ">shufti "
-                print("screen proceeded to shufti")
-                if 'shufti' in expectedloginflow:
-                    testflow = testflow + "initiated"
-                    shufti_initiation(self)
-                elif force:
-                    testflow = testflow + "forcefully initiated"
-                    test_name = 'signup_with_cpr_with_known_number_with_force_shufti'
-                    tr,status,message = shufti_initiation(self)
-                    print("shufti completed ,tr,status,message are  " ,tr,status,message)
-                else:
-                    testflow = testflow + "unexpected"
-                    print("this is not expected to be in shufti")
-            else:
-                loggedpersonname = d.find_element(By.ID,"txtPersonName").text
-                testflow = testflow + ">dashboard"
-                tr = checkassert(d,loggedpersonname ,"contains",loggedname,"checking logged name is :"+loggedname+"?")
-                if tr == True:
-                    status = "PASS"
-                else:
-                    status = "Fail"
-                    message = "not reached the dashboard , call_check dashboard here"
+#             #id	@id/edtPin  id	@id/edtConfirmPin
+#             print("confirming pin")
+#             d.find_element(By.ID,"edtPin").send_keys(loggeduserpin)
+#             print("PIN entered ,confirming PIN now")
+#             d.find_element(By.ID,"edtConfirmPin").send_keys(loggeduserpin)
+#             print("pin entered is",loggeduserpin,"now clicking proceed")
+#             # check_and_hide_keyboard(d)
+#             check_progressbar(d)
+#             # d.find_element(By.ID,"btnSubmit").click()
+#             # id	@id/txtPersonName
+#             print('checking for shufti screen')
+#             if len(d.find_elements(By.ID,"txtPersonName"))== 0:
+#                 testflow = testflow + ">shufti "
+#                 print("screen proceeded to shufti")
+#                 if 'shufti' in expectedloginflow:
+#                     testflow = testflow + "initiated"
+#                     shufti_initiation(self)
+#                 elif force:
+#                     testflow = testflow + "forcefully initiated"
+#                     test_name = 'signup_with_cpr_with_known_number_with_force_shufti'
+#                     tr,status,message = shufti_initiation(self)
+#                     print("shufti completed ,tr,status,message are  " ,tr,status,message)
+
+#                 else:
+#                     testflow = testflow + "unexpected"
+#                     print(RED+"\nthis flow is not expected to be in shufti"+CRESET)
+#             else:
+#                 loggedpersonname = d.find_element(By.ID,"txtPersonName").text
+#                 testflow = testflow + ">dashboard"
+#                 tr = checkassert(d,loggedpersonname ,"contains",loggedname,"checking logged name is :"+loggedname+"?")
+#                 if tr == True:
+#                     status = "PASS"
+#                 else:
+#                     status = "Fail"
+#                     message = "not reached the dashboard , call_check dashboard here"
                 
-        else:
-            print("\nthis is else in signup !!!,this means normal flow is not working\n")
-            # print("first condition: ",not len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack"))>0)
-            # print('len(d.find_elements(By.ID,"txtHeading")) (invert): ',len(d.find_elements(By.ID,"txtHeading")))
-            # print('len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack")) : ',len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack")))
-            # print("this second condition",len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
-            # print('len(d.find_elements(By.ID,"txtHeading"))',len(d.find_elements(By.ID,"txtHeading")))
-            # print('len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0',len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
+#         else:
+#             print("\nthis is else in signup !!!,this means normal flow is not working\n")
+#             # print("first condition: ",not len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack"))>0)
+#             # print('len(d.find_elements(By.ID,"txtHeading")) (invert): ',len(d.find_elements(By.ID,"txtHeading")))
+#             # print('len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack")) : ',len(d.find_elements(By.ID,"com.bfccirrus.bfcpayments.mobile:id/txtWelcomeBack")))
+#             # print("this second condition",len(d.find_elements(By.ID,"txtHeading")) > 0 and len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
+#             # print('len(d.find_elements(By.ID,"txtHeading"))',len(d.find_elements(By.ID,"txtHeading")))
+#             # print('len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0',len(d.find_elements(By.ID,"txtWelcomeDialog")) > 0)
             
-        print("checking current activity is dashboard ,if not the flow might have changed to shufti")
-        if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
-            if tr:
-                message = message + " , But also the activity dashboard not reached"
-                tr = "warn"
-                checkshufti = d.find_element(By.ID,'txtVerifyDobLabel') and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
-                if checkshufti:
-                    print("shufti procedure needed to be proccessed\n")
-                    print("\n\n\n check if this call to shufti is needed , it may not be needed after all")
-                    if force:
+#         print("checking current activity is dashboard ,if not the flow might have changed to shufti")
+#         if (d.current_activity != "com.bfc.bfcpayments.modules.home.view.DashboardActivity"):
+#             if tr:
+#                 message = message + " , But also the activity dashboard not reached"
+#                 tr = "warn"
+#                 checkshufti = d.find_element(By.ID,'txtVerifyDobLabel') and d.find_element(By.ID,'txtVerifyDobLabel').text == 'Consent for verification'
+#                 if checkshufti:
+#                     print("shufti procedure needed to be proccessed\n")
+#                     print("\n\n\n check if this call to shufti is needed , it may not be needed after all")
+#                     if force:
                         
-                        tr,status,message = shufti_initiation(self,minimal = True)
-                    # if tr:
-                    else:
-                        print("shufti procedure will not be initiated")
+#                         tr,status,message = shufti_initiation(self,minimal = True)
+#                     # if tr:
+#                     else:
+#                         print("shufti procedure will not be initiated,shufti not in login flow and force not enabled")
+#                         status = 'Fail'
                         
-                else:
-                    print("consent for verification not found. ")
-            else:
-                print("it is not expected to be in Dashboard as the test already failed")
-        else:
-            if tr:
-                message = message + " and Dashboard activity not Reach confirmed"
-            else:
-                message = 'the activity is not expected to reach in Dashboard as the test already failed' + " But the Activity UNEXPECTEDLY reached Dashboard "
-                print(YELLOW+"check and ensure expected login flow is correct..!!!"+CRESET)
-        print(message)
+                        
+#                 else:
+#                     print("consent for verification not found. ")
+#                     status = 'Fail'
+#             else:
+#                 print("it is not expected to be in Dashboard as the test already failed")
+#                 status = 'fail'
+#         else:
+#             if tr:
+#                 message = message + " and Dashboard activity not Reach confirmed"
+#             else:
+#                 message = 'the activity is not expected to reach in Dashboard as the test already failed' + " But the Activity UNEXPECTEDLY reached Dashboard "
+#                 print(YELLOW+"check and ensure expected login flow is correct..!!!"+CRESET)
+#         print(message)
         
-    except Exception as e:
-        # self.fail("Encountered an unexpected exception.test failed in "+test_name)
-        print(e)
-        save_screenshot(d, test_name)
-        status = "FAIL"
-        traceback.print_exc()
-        message = e 
-        tr = False
+#     except Exception as e:
+#         # self.fail("Encountered an unexpected exception.test failed in "+test_name)
+#         print(e)
+#         save_screenshot(d, test_name)
+#         status = "FAIL"
+#         traceback.print_exc()
+#         message = e 
+#         tr = False
         
-        # print(error_message)  
+#         # print(error_message)  
     
-    finally:
-        testcasereport(test_name,status,message)
-        return tr
+#     finally:
+#         testcasereport(test_name,status,message)
+#         return tr
 
 # #sample code for feeder for reference remove it after development
 # def xxxxxxxxxpaybywalletfeeder(self):

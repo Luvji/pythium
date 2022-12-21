@@ -5,7 +5,10 @@ from random import randint
 import yaml
 from pathlib import Path
 from getyaml import getyaml, serialise_data
+from dateutil import parser
+
 parent_dir = os.getcwd()
+
 
 
 # Use xlwings to automate data from excel 
@@ -54,19 +57,41 @@ parent_dir = os.getcwd()
 # loggeduserpin = '123321'
 # loggedemail = 'test@example.net'
 
-loggedcpr = '840160660'
-loggedmobile = '34104500'
-loggeddob = ['20-Jan-1984']
-loggedname = 'ROGER'
-loggedpassport = ''
+#########THIS SHOWED ERRROR -SHUFTI NOT COMPLETE################################
+# loggedcpr = '840100003'
+# loggedmobile = '30100003'
+# loggeddob = ['20-Jan-1984']
+# loggedname = 'luffy3'
+# loggedpassport = ''
+# loggedotp = '111111'
+# loggeduserpin = '123321'
+# loggedemail = 'tes1t@example.net'
+# expectedloginflow = []
+##################################################
+#########THIS SHOWED ERRROR -S HUFTI NOT COMPLETE################################
+# loggedcpr = '840100004'
+# loggedmobile = '30100004'
+# loggeddob = ['20-Jan-1991']
+# loggedname = 'luffy4'
+# loggedpassport = ''
+# loggedotp = '111111'
+# loggeduserpin = '123321'
+# loggedemail = 'tes1t@example.net'
+# expectedloginflow = []
+#################################################
+# ##########onboarded################################
+loggedcpr = '908122017'
+loggedmobile = '33333333'
+loggeddob = ['09-Aug-1994']
+loggedname = 'Margaretlengthyfirstname'
+loggedpassport = 'dLkg29018'
 loggedotp = '111111'
 loggeduserpin = '123321'
 loggedemail = 'tes1t@example.net'
-expectedloginflow = ['shufti',]
-
-
+expectedloginflow = []
+expectedmcflow = []
+##################################################
 # Courtney	Bowen	Santos	MALE	921851388	10/10/2027	39932689	veronicajohnson@example.org	Lake Matthew	1988-09-27	Moldova	Mxah84125	12/16/2035	home	jESG22	j11	Xz041	9627	english	CPR	Product designer
-
 #unknownThomas
 # loggedcpr = '921851388'
 # loggedmobile = '39932689'
@@ -89,8 +114,11 @@ expectedloginflow = ['shufti',]
 # loggedname = 'Davis'
 
 
-if isinstance(loggeddob, str):
-    dob = loggeddob.rsplit("-") #['2009', '03', '20']
+if isinstance(loggeddob, str): #if the date given is not a list but a string
+    format = "%Y-%m-%d" # The format
+    selecteddate = parser.parse(loggeddob) #converting to dateobject
+    dateselected = selecteddate.strftime(format) #converting back to string with format
+    dob = loggeddob.rsplit("-") #2009-03-20 >> ['2009', '03', '20']
     bday =  dob[2]    #format dd
     bmonth =  dob[1]  #format mm
     byear =  dob[0] #format yyyy
@@ -100,13 +128,11 @@ if isinstance(loggeddob, str):
     lastbyear =  "" #format yyyy
 
 # optparser variable
-# global force
+#############################3 global variables and settings #########################
 force = True
 expected = True
 # variables
-
 minimal = False
-
 addmoneyamount = 1
 addmoneyupperlimit = 3999
 cardnumber = "460041123"+str( randint(1000000,9999999)) # 460041<10digits>
@@ -114,10 +140,14 @@ cardholdername = "redlohdrac eman"
 nofailtestcase = ["register_with_cpr",'feed_signin'] # if this fails close this test ,without running anything else
 walletbal = 0 #update whenever possible
 #cpr number generated to transfer money by
+
 sendtocpr = [790241401,871275287,840160550]
 selectedsendtocpr = random.choice(sendtocpr)
 outputpath = os.path.join(parent_dir, "Output")
 fcsv = {} #from CSV
+newuserloginflow = ['shufti']
+newmcapplyflow =['']
+debugapkpath = ''
 
 # feedercheck ={'tc':list()} #  dict{'tc':list[{k1:v1,k2:v2},{k1:v1,k2:v2},{k1:v1,k2:v2}]}
 
@@ -128,8 +158,8 @@ feederexceloutput = ''
 feederhtmloutput = ''
 check = {"pass" : 0 , "fail" : 0 ,"warn": 0,"w_test":[], "p_test" : [] , "f_test" : [] ,"flow" :{}}
 
-#parent dir /app/*.apk
-apkpath = os.path.join(parent_dir, 'app','app-uat (7).apk')
+#parent dir /app/*.apk app-uat (11).apk
+apkpath = os.path.join(parent_dir, 'app','app-uat (11).apk')
 # debugapkpath = os.path.join(parent_dir, 'app','app-debug.apk')C:\Users\Administrator\Desktop\pyppium_new_app\app\app-uat (7).apk
 #log file path C:\Users\Administrator\Desktop\pyppium\Output\2022-09-01\log\screenshots
 # logpath = "" #changed name to to session log file
@@ -159,12 +189,47 @@ outputtime = str(datetime.now().strftime("%H-%M-%S"))
 # path to create excel output
 outputexcelpath = path2
 # ['changemobile','shufti','passport','firsttime']
+#################################### settings ########################################
 try:
     if expectedloginflow: 
         print('expectedloginflow is ',expectedloginflow)   
 except NameError:
     # expectedloginflow = ['changemobile','shufti','passport','firsttime']
     expectedloginflow = []
+    print('expectedloginflow is set as default : ',expectedloginflow)   
+
+try:
+    if loggedotp: 
+        print('loggedotp is ',loggedotp)   
+except NameError:
+    # expectedloginflow = ['changemobile','shufti','passport','firsttime']
+        loggedotp = '111111'
+        print('expectedloginflow is set as default : ',expectedloginflow)   
+        
+try:
+    if loggeduserpin: 
+        print('loggeduserpin is ',loggeduserpin)   
+except NameError:
+    # expectedloginflow = ['changemobile','shufti','passport','firsttime']
+        loggeduserpin = '123321'
+        print('expectedloginflow is set as default : ',expectedloginflow)   
+        
+try:
+    if loggedemail: 
+        print('loggedemail is ',loggedemail)   
+except NameError:
+    # expectedloginflow = ['changemobile','shufti','passport','firsttime']
+        loggedemail = 'tes1t@example.net'
+        print('expectedloginflow is set as default : ',expectedloginflow)   
+        
+        
+####### multicurrency
+# expectedmcflow = [newuser]
+# expecting the user to be new user
+
+        
+#################################### user settings(end) ########################################
+ 
 sessionlogfile =os.path.join(path2,"log", outputtime+'_log.txt')    
 testlogfile = os.path.join(path2,"log", outputtime+'Teststatus_log.txt')
 

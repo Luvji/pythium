@@ -134,6 +134,7 @@ class Bfc():
         desired_caps['appPackage'] = "com.bfccirrus.bfcpayments.mobile"
         desired_caps['app'] =apkpath
         desired_caps['autoGrantPermissions'] = 'true'
+        # desired_caps['automationName']='UiAutomator2'
         # desired_caps['appActivity'] = "com.bfc.bfcpayments.modules.signup.view.SignUpActivity" #signup
         desired_caps['appActivity'] = "com.bfc.bfcpayments.modules.splash.view.SplashScreenActivity"
         desired_caps['noReset'] = noreset
@@ -299,7 +300,7 @@ class Bfc():
                     v = page = serialiserpages[n]
                     sleep(2)
                     if self.driver.current_activity == '.NexusLauncherActivity' and occurance > 0:
-                        print("seems app is a out of app , sleeping unconditionally for 5 seconds")
+                        print("seems app is a out of app ENVIRONMENT , sleeping unconditionally for 5 seconds")
                         sleep (5)
                         # print("\n\033[42mexcecuting test \033[104m" +k+ "\033[42m from page -> " + v +" ;on screen "+page+"\033[0m")
                     print("activity check = ",activity)
@@ -365,10 +366,13 @@ class Bfc():
 # ---START OF SCRIPT
 if __name__ == '__main__':
     
-    print("script started")
+    print("emulator connected: script started")
+    # sleep(2) # 3why?
     print("testran",testsran)
     
     tests = Bfc()
+    handle_one_size = tests.driver.get_window_size()
+    print("size of device is ",handle_one_size)
     tests.evaluate()
     totdef =len(multidef)+len(nodef)+len(okdef)
     

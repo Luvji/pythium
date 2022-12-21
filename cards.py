@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 
 cardoccurance = 0
 
-def agree_activation(self,minimal = False):
+def agree_activation(self,minimal = False): #debit card
     '''
     just checks if the activation screen is present or not.
     put minimal as true , if just checking on a routine - it will not raise any issues\n
@@ -59,7 +59,7 @@ def agree_activation(self,minimal = False):
         return tr,message
         
     
-def register_cards(self,minimal = False):
+def register_cards(self,minimal = False): #debit card
     '''
     just checks if the activation screen is present or not.
     put minimal as true , if just checking on a routine - it will not raise any issues\n
@@ -109,3 +109,62 @@ def register_cards(self,minimal = False):
         #may need to check the crash
         testcasereport(test_name,status,message)
         return tr
+    
+def check_MC_card_status(self):
+    print("this is mc status first line")
+    d = driver =  self.driver
+    test_name = 'check_MC_card_status'
+    status = "FAIL"
+    message = "unexpected error occured in "+test_name
+    # com.android.tools.idea.layoutinspector.tree.TreeViewNode@5edecaab
+    try:
+
+        # id	@id/btnApplyButtonTravelBuddy
+        print("checking for the mc card status")
+        wait_until(d,'btnApplyButtonTravelBuddy',visible)
+        applybtntext = d.find_element(By.ID,'btnApplyButtonTravelBuddy').text
+        print("checking for the mc button status",applybtntext)
+        if applybtntext == 'Apply':
+            print("\tcard isnt applied with this user. checking the steps")
+            if expectedmcflow == [] or 'newuser' in expectedmcflow :
+                if expectedmcflow == []:
+                    print(YELLOW +" \texpected flow not defined the flow will continue please define the flow for more accurate result"+CRESET)
+                else:
+                    print("the user is expected to be new user")
+            else:
+                # if any flow keyword is to be excluded pass it here
+                if force:
+                    print("flow is not expected , but with force on trying to complete the flow")
+                    
+                else:
+                    message = "Flow is not expected and force is not enabled , please recheck the flow and retry if it is not intended" 
+                    status = "FAIL"
+                    tr = False
+                    print(message)
+        elif applybtntext == 'Manage' or  applybtntext == 'manage':
+            print("\n\n manage flow is incomplete")
+        elif applybtntext == 'replace' or  applybtntext == 'Replace':
+            print("\n\n replace flow is incomplete")
+        else:
+            print("applybtn text is",applybtntext)
+            print("\nthis is not expected as an option , please update the testcase")
+    
+    except Exception as e:
+        save_screenshot(d, test_name)
+        status = "FAIL"
+        message = e
+        tr = False
+    except:
+        save_screenshot(d, test_name)
+        status = "FAIL"
+        message = traceback.format_exc()
+        # print(error_message)
+        tr = False
+    finally:
+        testcasereport(test_name,status,message)
+        return tr    
+        
+        
+    
+    
+    
